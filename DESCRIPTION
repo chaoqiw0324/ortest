@@ -8,8 +8,7 @@ Authors@R: c(
            role    = c("aut", "cre", "cph"),
            email   = "cw3370@cumc.columbia.edu",
            comment = c(ORCID = "{{orcid}}")))
-Description: A paragraph providing a full description of the project (on 
-    several lines...)
+Description: Function for conditional independence test
 URL: https://github.com/chaoqiw0324/ortest
 BugReports: https://github.com/chaoqiw0324/ortest/issues
 License: GPL (>= 2)
