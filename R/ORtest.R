@@ -1,63 +1,63 @@
-basic_function <- function(X, Y, Z=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
-  # Check if X and Y are binary or continuous
-  if(! is.numeric(X) | ! is.numeric(Y)){
-    cat("The X and Y must be numeric data")
+basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
+  # Check if x and y are binary or continuous
+  if(! is.numeric(x) | ! is.numeric(y)){
+    cat("The x and y must be numeric data")
   }
-  if(! all_numeric(Z)){
-    cat("The Z must be numeric data or empty")
+  if(! all_numeric(S)){
+    cat("The S must be numeric data or empty")
   }
-  is_binary_X <- FALSE
+  is_binary_x <- FALSE
   
-  is_binary_Y <- FALSE
+  is_binary_y <- FALSE
   # Check if the variable is a factor with exactly two levels
-  if (is.factor(X) && nlevels(X) == 2) {
+  if (is.factor(x) && nlevels(x) == 2) {
     # Convert factor to numeric 0 and 1
-    X <- as.numeric(X) - 1
-    is_binary_X <- TRUE
+    x <- as.numeric(x) - 1
+    is_binary_x <- TRUE
   }
   
   # Check if the variable is numeric with exactly two unique values
-  if (is.numeric(X) && length(unique(X)) == 2) {
+  if (is.numeric(x) && length(unique(x)) == 2) {
     # Identify the two unique values
-    unique_values <- unique(X)
+    unique_values <- unique(x)
     # Convert to 0 and 1
-    X <- ifelse(X == unique_values[1], 0, 1)
-    is_binary_X <- TRUE
+    x <- ifelse(x == unique_values[1], 0, 1)
+    is_binary_x <- TRUE
   }
   
   # Check if the variable is a factor with exactly two levels
-  if (is.factor(Y) && nlevels(Y) == 2) {
+  if (is.factor(y) && nlevels(y) == 2) {
     # Convert factor to numeric 0 and 1
-    Y <- as.numeric(Y) - 1
-    is_binary_Y <- TRUE
+    y <- as.numeric(y) - 1
+    is_binary_y <- TRUE
   }
   
   # Check if the variable is numeric with exactly two unique values
-  if (is.numeric(Y) && length(unique(Y)) == 2) {
+  if (is.numeric(y) && length(unique(y)) == 2) {
     # Identify the two unique values
-    unique_values <- unique(Y)
+    unique_values <- unique(y)
     # Convert to 0 and 1
-    Y <- ifelse(Y == unique_values[1], 0, 1)
-    is_binary_Y <- TRUE
+    y <- ifelse(y == unique_values[1], 0, 1)
+    is_binary_y <- TRUE
   }
-  Z2 <- as_tibble(Z)
-  colnames(Z2) <- paste0("X", colnames(Z2))
-  is_big_Z <- FALSE
-  if(is.null(Z2)){
-    is_big_Z <- FALSE
+  S2 <- as_tibble(S)
+  colnames(S2) <- paste0("X", colnames(S2))
+  is_big_S <- FALSE
+  if(is.null(S2)){
+    is_big_S <- FALSE
   }else{
-    is_big_Z <- ifelse( ncol(Z2) > 4,TRUE, FALSE)
+    is_big_S <- ifelse( ncol(S2) > 4,TRUE, FALSE)
   }
-  # Check if the dimension of Z is big (> 4)
+  # Check if the dimension of S is big (> 4)
   
   
-  if (is_binary_X) {
+  if (is_binary_x) {
     exp_bin = TRUE
   } else {
     exp_bin = FALSE
   }
   
-  if (is_binary_Y) {
+  if (is_binary_y) {
     out_bin = TRUE
   } else {
     out_bin = FALSE
@@ -65,13 +65,13 @@ basic_function <- function(X, Y, Z=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
   
   roots="uni"
   
-  if(is_big_Z){
-    res <- psi.hat_sl_2in1(Y=Y,A=X,L=Z2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+  if(is_big_S){
+    res <- psi.hat_sl_2in1(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
   }else{
     if (!cross_fitting) {
-      res <- psi.hat_linear(Y=Y,A=X,L=Z2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots)
+      res <- psi.hat_linear(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots)
     }else{
-      cat("The cross-fitting is not available for columns of Z is smaller than 4")  
+      cat("The cross-fitting is not available for columns of S is smaller than 4")  
     }
     
     
@@ -79,68 +79,68 @@ basic_function <- function(X, Y, Z=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
   # Two-sided p-value
   # estimate <- res[1]
   # sd_estimate <- res[2]
-  # Z <- (estimate - 0) / sd_estimate
+  # S <- (estimate - 0) / sd_estimate
   # 
   # # Calculate two-sided p-value
-  # p_value_two_sided <- 2 * pnorm(-abs(Z))
+  # p_value_two_sided <- 2 * pnorm(-abs(S))
   # 
   # # Output
   # return(list(p_value = p_value_two_sided, alpha = alpha, independent = p_value_two_sided > alpha))
   return(res)
 }
 
-multi_level <- function(X, Y, Z,sl=c(), cross_fitting=FALSE, kfolds=5) {
-  # Check if X and Y are binary or continuous
-  if(! is.numeric(X) | ! is.numeric(Y)){
-    cat("The X and Y must be numeric data")
+multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
+  # Check if x and y are binary or continuous
+  if(! is.numeric(x) | ! is.numeric(y)){
+    cat("The x and y must be numeric data")
   }
-  if(! all_numeric(Z)){
-    cat("The Z must be numeric data or empty")
+  if(! all_numeric(S)){
+    cat("The S must be numeric data or empty")
   }
   dat_y <- NULL
   dat_x <- NULL
   # If the variable is a factor with more than one level
-  if (is.factor(Y) && nlevels(Y) > 2) {
+  if (is.factor(y) && nlevels(y) > 2) {
     # Use model.matrix to create dummy variables
-    dummies <- model.matrix(~ Y - 1)
-    colnames(dummies) <- paste0("y", "_", levels(Y))
+    dummies <- model.matrix(~ y - 1)
+    colnames(dummies) <- paste0("y", "_", levels(y))
     dat_y <- as.data.frame(dummies)
   }
   
   # If the variable is numeric with less than 5 unique values
-  if (is.numeric(Y) && length(unique(Y)) > 2 && length(unique(Y)) < 5) {
+  if (is.numeric(y) && length(unique(y)) > 2 && length(unique(y)) < 5) {
     # Convert numeric to factor first and then create dummy variables
-    Y <- factor(Y)
-    dummies <- model.matrix(~ Y - 1)
-    colnames(dummies) <- paste0("y", "_", levels(Y))
+    y <- factor(y)
+    dummies <- model.matrix(~ y - 1)
+    colnames(dummies) <- paste0("y", "_", levels(y))
     dat_y <- as.data.frame(dummies)
   } 
   
   # If the variable is a factor with more than one level
-  if (is.factor(X) && nlevels(X) > 2) {
+  if (is.factor(x) && nlevels(x) > 2) {
     # Use model.matrix to create dummy variables
-    dummies <- model.matrix(~ X - 1)
-    colnames(dummies) <- paste0("x", "_", levels(X))
+    dummies <- model.matrix(~ x - 1)
+    colnames(dummies) <- paste0("x", "_", levels(x))
     dat_x <- as.data.frame(dummies)
   }
   
   # If the variable is numeric with less than 5 unique values
-  if (is.numeric(X) && length(unique(X)) > 2 && length(unique(X)) < 5) {
+  if (is.numeric(x) && length(unique(x)) > 2 && length(unique(x)) < 5) {
     # Convert numeric to factor first and then create dummy variables
-    X <- factor(X)
-    dummies <- model.matrix(~ X - 1)
-    colnames(dummies) <- paste0("x", "_", levels(X))
+    x <- factor(x)
+    dummies <- model.matrix(~ x - 1)
+    colnames(dummies) <- paste0("x", "_", levels(x))
     dat_x <- as.data.frame(dummies)
   } 
   ########################################  
   if(is.null(dat_y)){
     if (is.null(dat_x)) {
-      res <- basic_function(X, Y, Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+      res <- basic_function(x, y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
     }else{
       num_x <- ncol(dat_x)
       result <- matrix(nrow = num_x,ncol=2)
       for (i in 1:num_x) {
-        res <- basic_function(dat_x[,i], Y, Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+        res <- basic_function(dat_x[,i], y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -154,7 +154,7 @@ multi_level <- function(X, Y, Z,sl=c(), cross_fitting=FALSE, kfolds=5) {
       num_y <- ncol(dat_y)
       result <- matrix(nrow = num_y,ncol=2)
       for (i in 1:num_y) {
-        res <- basic_function(X, dat_y[,i], Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+        res <- basic_function(x, dat_y[,i], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -166,7 +166,7 @@ multi_level <- function(X, Y, Z,sl=c(), cross_fitting=FALSE, kfolds=5) {
       result <- matrix(nrow = num_x*num_y,ncol=2)
       for (i in 1:num_x) {
         for (j in 1:num_y) {
-          res <- basic_function(dat_x[,i], dat_y[,j], Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+          res <- basic_function(dat_x[,i], dat_y[,j], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
           result[(i-1)*num_y+j,1] <- res[1]
           result[(i-1)*num_y+j,2] <- res[2]
         }
@@ -178,10 +178,10 @@ multi_level <- function(X, Y, Z,sl=c(), cross_fitting=FALSE, kfolds=5) {
   }
   # estimate <- res[1]
   # sd_estimate <- res[2]
-  # Z <- (estimate - 0) / sd_estimate
+  # S <- (estimate - 0) / sd_estimate
   # 
   # # Calculate two-sided p-value
-  # p_value_two_sided <- 2 * pnorm(-abs(Z))
+  # p_value_two_sided <- 2 * pnorm(-abs(S))
   # 
   # # Output
   # return(list(p_value = p_value_two_sided, alpha = alpha, independent = p_value_two_sided > alpha))
@@ -191,14 +191,14 @@ multi_level <- function(X, Y, Z,sl=c(), cross_fitting=FALSE, kfolds=5) {
 
 ORtest_single <- function(x,y,S,suffStat) {
   
-  # Extract the positions of X, Y, and Z from the location vector
+  # Extract the positions of x, y, and S from the location vector
   x_pos <- x
   y_pos <- y
-  z_pos <- S
+  s_pos <- S
   
-  # Ensure that X and Y positions are different
+  # Ensure that x and y positions are different
   if (x_pos == y_pos) {
-    stop("X and Y should be at different positions.")
+    stop("x and y should be at different positions.")
   }
   dat <- suffStat$dat
   sl <- suffStat$sl
@@ -207,20 +207,20 @@ ORtest_single <- function(x,y,S,suffStat) {
   
   
   ### p value 1
-  # Extract X, Y, and Z variables from the dataframe
-  X <- dat[, x_pos]
-  Y <- dat[, y_pos]
-  Z <- dat[, z_pos]
-  res1 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  # Extract x, y, and S variables from the dataframe
+  x <- dat[, x_pos]
+  y <- dat[, y_pos]
+  S <- dat[, s_pos]
+  res1 <- multi_level(x = x,y= y,S=S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
   
   
   
   # Two-sided p-value
   estimate <- res1[1]
   sd_estimate <- res1[2]
-  Z <- (estimate - 0) / sd_estimate
+  z <- (estimate - 0) / sd_estimate
   
   # Calculate two-sided p-value
-  p_value_two_sided <- 2 * pnorm(-abs(Z))
+  p_value_two_sided <- 2 * pnorm(-abs(z))
   return(p_value_two_sided)
 }

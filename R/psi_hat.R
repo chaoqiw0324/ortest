@@ -24,58 +24,58 @@ all_numeric <- function(df) {
   return(all_numeric)
 }
 
-psi.hat_linear <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, exp.scalar = FALSE, root = "uni"){
+psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, exp.scalar = FALSE, root = "uni"){
   ## Function: estimate the odds ratio parameter psi
-  ## Input: 1. An outcome nuisance model, onm = f(Y|L,A=0)
-  ##        2. An exposure nuisance model, enm = g(A|Y=0,L)
+  ## Input: 1. An outcome nuisance model, onm = f(y|L,x=0)
+  ##        2. An exposure nuisance model, enm = g(x|y=0,L)
   ## Output: A real number (vector) psi.hat, an estimate of the conditional odds ratio parameter psi
   
   
-  if(length(L)==0){
-    fm_out <- "Y ~ A"
+  if(length(S)==0){
+    fm_out <- "y ~ x"
     fm_out <- as.formula(fm_out)
-    fm_exp <- "A ~ Y"
+    fm_exp <- "x ~ y"
     fm_exp <- as.formula(fm_exp) ## for cases where conditioning set is empty
-    dat <- data.frame(Y,A)
+    dat <- data.frame(y,x)
   }else{
-    covnames <- colnames(L)
-    fm_out <- paste0("Y ~ A + ", paste(covnames, collapse = "+"))
+    covnames <- colnames(S)
+    fm_out <- paste0("y ~ x + ", paste(covnames, collapse = "+"))
     fm_out <- as.formula(fm_out)
-    fm_exp <- paste0("A ~ Y + ", paste(covnames, collapse = "+"))
+    fm_exp <- paste0("x ~ y + ", paste(covnames, collapse = "+"))
     fm_exp <- as.formula(fm_exp)
-    dat <- data.frame(Y,A,L)
+    dat <- data.frame(y,x,S)
   }
   
   
-  if(!is.null(subset)) Y <- Y[subset]
-  if(!is.null(subset)) A <- A[subset,]
-  if(!is.null(subset)) L <- L[subset,]
+  if(!is.null(subset)) y <- y[subset]
+  if(!is.null(subset)) x <- x[subset,]
+  if(!is.null(subset)) S <- S[subset,]
   #temp
   
   
-  refA <- 0 
-  refY <- 0
+  refx <- 0 
+  refy <- 0
   
   if(out.bin && exp.bin){
-    h.dag <- 0.25 ## probability f.dag(Y|L) = g.dag(A|L) = 0.5, i.e., Y ~ A ~ Bernoulli(0.5)
+    h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
     dat1 <- dat
     dat2 <- dat
     
     outcome <- glm(fm_out,family=binomial,data = dat)
-    dat1$A <- 0 ## setting A=0
+    dat1$x <- 0 ## setting x=0
     onm <- predict.glm(outcome, newdata=dat1,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
-    onm[Y==0] <- 1-onm[Y==0]
+    onm[y==0] <- 1-onm[y==0]
     
     exposure <- glm(fm_exp, family = binomial,data = dat)
-    dat2$Y <- 0 ## setting Y=0
+    dat2$y <- 0 ## setting y=0
     enm <- predict.glm(exposure, newdata=dat2,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
-    enm[A==0] <- 1-enm[A==0]
+    enm[x==0] <- 1-enm[x==0]
     
-    d.diff <- (-1)^(Y+A) ## Eric's suggestion, for Y,A binary
+    d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
     
     # build estimate function
     estimating_function <- function(psi){
-      estf = d.diff*h.dag / (exp(psi*Y*A)*onm*enm)
+      estf = d.diff*h.dag / (exp(psi*y*x)*onm*enm)
       return(estf) 
     }
     
@@ -88,7 +88,7 @@ psi.hat_linear <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin =
     
     res <- tryCatch({
       if (root == "uni") {
-        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*Y*A)*onm*enm) ) }
+        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
         est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
         res <-  est$root
       }else if(root == "multi"){
@@ -125,7 +125,7 @@ psi.hat_linear <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin =
     outcome <- glm(fm_out, family = gaussian,data = dat)
   } else outcome <- glm(fm_out, family = binomial,data = dat)
   dat1 <- dat
-  dat1$A <- 0 ## setting A=0
+  dat1$x <- 0 ## setting x=0
   onm <- predict.glm(outcome, newdata=dat1,type="response")
   
   
@@ -133,18 +133,18 @@ psi.hat_linear <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin =
     exposure <- glm(fm_exp, family = gaussian,data = dat)
   } else exposure <- glm(fm_exp, family = binomial,data = dat)
   dat2 <- dat
-  dat2$Y <- 0 ## setting Y=0
+  dat2$y <- 0 ## setting y=0
   enm <- predict.glm(exposure, newdata=dat2,type="response")
   
   
   
-  #U <- function(psi,onm,enm){ sum( (Y - onm)*(A - enm)*exp(-psi*Y*A) )}
+  #U <- function(psi,onm,enm){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
   #est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, onm = onm, enm = enm)
   #return(est$root)
   
   # build estimate function
   estimating_function <- function(psi){
-    estf = (Y - onm)*(A - enm)*exp(-psi*Y*A) 
+    estf = (y - onm)*(x - enm)*exp(-psi*y*x) 
     return(estf) 
   }
   
@@ -155,7 +155,7 @@ psi.hat_linear <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin =
   }   
   
   if (root == "uni") {
-    U <- function(psi){ sum( (Y - onm)*(A - enm)*exp(-psi*Y*A) )}
+    U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
     par.init <- c(0)
     sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
     res <- sol$par
@@ -185,28 +185,28 @@ psi.hat_linear <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin =
   
 }
 
-psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, exp.scalar = FALSE, root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
+psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, exp.scalar = FALSE, root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
   ## Function: estimate the odds ratio parameter psi
-  ## Input: 1. An outcome nuisance model, onm = f(Y|L,A=0)
-  ##        2. An exposure nuisance model, enm = g(A|Y=0,L)
+  ## Input: 1. An outcome nuisance model, onm = f(y|S,x=0)
+  ##        2. An exposure nuisance model, enm = g(x|y=0,S)
   ## Output: A real number (vector) psi.hat_ranger, an estimate of the conditional odds ratio parameter psi
   
   ## Todo: generalize estimating eq to arbitrary dimensions
   
-  X_exp <- data.frame(Y, L)
-  Y_exp <- data.frame(A)
-  X_out <- data.frame(A, L)
-  Y_out <- data.frame(Y)
+  X_exp <- data.frame(y, S)
+  Y_exp <- data.frame(x)
+  X_out <- data.frame(x, S)
+  Y_out <- data.frame(y)
   
   
-  if (!is.null(subset)) Y <- Y[subset]
-  if (!is.null(subset)) A <- A[subset,]
-  if (!is.null(subset)) L <- L[subset,]
+  if (!is.null(subset)) y <- y[subset]
+  if (!is.null(subset)) x <- x[subset,]
+  if (!is.null(subset)) S <- S[subset,]
   #temp
   
   
-  refA <- 0 
-  refY <- 0
+  refx <- 0 
+  refy <- 0
   
   
   allowed_methods <- c(
@@ -240,21 +240,21 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
     
     
     if(out.bin && exp.bin){
-      h.dag <- 0.25 ## probability f.dag(Y|L) = g.dag(A|L) = 0.5, i.e., Y ~ A ~ Bernoulli(0.5)
+      h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
       # outcome 
       ## outcome tune parameter 
       
       X_out_new <- X_out
       Y_out1 <- Y_out
-      outcome <- SuperLearner(Y =Y_out1$Y,
+      outcome <- SuperLearner(Y =Y_out1$y,
                               X = X_out,
                               family = binomial(),
                               SL.library = sl_binomial)
       
-      X_out_new$A <- 0 ## setting A=0
+      X_out_new$x <- 0 ## setting x=0
       onm <- predict(outcome, X=X_out_new)$pred
       # onm <- predict(outcome, data=dat1,type="prob")[,2]
-      onm[Y==0] <- 1-onm[Y==0]
+      onm[y==0] <- 1-onm[y==0]
       
       # exposure 
       # exposure tune parameter
@@ -262,20 +262,20 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
       X_exp_new <- X_exp
       Y_exp1 <- Y_exp
       
-      exposure <- SuperLearner(Y = Y_exp1$A,
+      exposure <- SuperLearner(Y = Y_exp1$x,
                                X = X_exp,
                                family = binomial(),
                                SL.library = sl_binomial)
-      X_exp_new$Y <- 0 ## setting Y=0
+      X_exp_new$y <- 0 ## setting y=0
       enm <- predict(exposure, X = X_exp_new)$pred
       # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
-      enm[A==0] <- 1-enm[A==0]
+      enm[x==0] <- 1-enm[x==0]
       
       
-      d.diff <- (-1)^(Y+A) ## Eric's suggestion, for Y,A binary
+      d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
       # build estimate function
       estimating_function <- function(psi){
-        estf = d.diff*h.dag / (exp(psi*Y*A)*onm*enm)
+        estf = d.diff*h.dag / (exp(psi*y*x)*onm*enm)
         return(estf) 
       }
       
@@ -288,7 +288,7 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
       
       res <- tryCatch({
         if (root == "uni") {
-          U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*Y*A)*onm*enm) ) }
+          U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
           est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
           res <-  est$root
         }else if(root == "multi"){
@@ -329,63 +329,63 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
     if(!out.bin){
       
       X_out_new <- X_out
-      Y_out$Y1 <- (Y_out$Y-mean(Y_out$Y))/sd(Y_out$Y)
+      Y_out$y1 <- (Y_out$y-mean(Y_out$y))/sd(Y_out$y)
       
       
-      outcome <- SuperLearner(Y = Y_out$Y1,
+      outcome <- SuperLearner(Y = Y_out$y1,
                               X = X_out,
                               family = gaussian(),
                               SL.library = sl_gaussian)
       # onm <- predict(outcome, data=dat1,type="response")$prediction
       onm <- predict(outcome, X = X_out_new)$pred
-      onm <- onm*sd(Y_out$Y)+mean(Y_out$Y)
+      onm <- onm*sd(Y_out$y)+mean(Y_out$y)
     }else{
       
       X_out_new <- X_out
       Y_out1 <- Y_out
-      outcome <- SuperLearner(Y =Y_out1$Y,
+      outcome <- SuperLearner(Y =Y_out1$y,
                               X = X_out,
                               family = binomial(),
                               SL.library = sl_binomial)
       
-      X_out_new$A <- 0 ## setting A=0
+      X_out_new$x <- 0 ## setting x=0
       onm <- predict(outcome, X = X_out_new)$pred
       # onm <- predict(outcome, data=dat1,type="prob")[,2]
-      onm[Y == 0] <- 1 - onm[Y == 0]
+      onm[y == 0] <- 1 - onm[y == 0]
     }
     
     
     if(!exp.bin){
       X_exp_new <- X_exp
-      Y_exp$A1 <- (Y_exp$A-mean(Y_exp$A))/sd(Y_exp$A)
+      Y_exp$x1 <- (Y_exp$x-mean(Y_exp$x))/sd(Y_exp$x)
       
       
       
-      exposure <- SuperLearner(Y = Y_exp$A1,
+      exposure <- SuperLearner(Y = Y_exp$x1,
                                X = X_exp,
                                family = gaussian(),
                                SL.library = sl_gaussian)
-      X_exp_new$Y <- 0 ## setting Y=0
+      X_exp_new$y <- 0 ## setting y=0
       # enm <- predict(exposure, data=dat2,type="response")$predictions
       enm <- predict(exposure, X = X_exp_new)$pred
-      enm <- enm*sd(Y_exp$A)+mean(Y_exp$A)
+      enm <- enm*sd(Y_exp$x)+mean(Y_exp$x)
     }else{
       X_exp_new <- X_exp
       Y_exp1 <- Y_exp
       
-      exposure <- SuperLearner(Y = Y_exp1$A,
+      exposure <- SuperLearner(Y = Y_exp1$x,
                                X = X_exp,
                                family = binomial(),
                                SL.library = sl_binomial)
-      X_exp_new$Y <- 0 ## setting Y=0
+      X_exp_new$y <- 0 ## setting Y=0
       enm <- predict(exposure, X=X_exp_new)$pred
       # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
-      enm[A == 0] <- 1 - enm[A == 0]
+      enm[x == 0] <- 1 - enm[x == 0]
     }
     
     # build estimate function
     estimating_function <- function(psi){
-      estf = (Y - onm)*(A - enm)*exp(-psi*Y*A) 
+      estf = (y - onm)*(x - enm)*exp(-psi*y*x) 
       return(estf) 
     }
     
@@ -398,7 +398,7 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
     
     res <- tryCatch({
       if (root == "uni") {
-        U <- function(psi){ sum( (Y - onm)*(A - enm)*exp(-psi*Y*A) )}
+        U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
         par.init <- c(0)
         sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
         res <- sol$par
@@ -435,7 +435,7 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
   }else{
     ################################ Cross_Fitting   
     set.seed(2024)
-    folds <- createFolds(dat$Y, k = kfolds, list = TRUE, returnTrain = FALSE)
+    folds <- createFolds(dat$y, k = kfolds, list = TRUE, returnTrain = FALSE)
     predictions <- vector("list", kfolds)
     
     for (i in 1:kfolds) {
@@ -444,7 +444,7 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
       train_indices <- setdiff(1:nrow(dat), test_indices)
       
       if(out.bin && exp.bin){
-        h.dag <- 0.25 ## probability f.dag(Y|L) = g.dag(A|L) = 0.5, i.e., Y ~ A ~ Bernoulli(0.5)
+        h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
         X_out_train  <- as_tibble(X_out[train_indices,])
         colnames(X_out_train) <- colnames(X_out)
         
@@ -457,12 +457,12 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         Y_out_test   <- as_tibble(Y_out[test_indices,])
         colnames(Y_out_test) <- colnames(Y_out)
         
-        outcome <- SuperLearner(Y =Y_out_train$Y,
+        outcome <- SuperLearner(Y =Y_out_train$y,
                                 X = X_out_train,
                                 family = binomial(),
                                 SL.library = sl_binomial)
         
-        X_out_test$A <- 0 ## setting A=0
+        X_out_test$x <- 0 ## setting x=0
         onm <- predict(outcome, newdata=X_out_test)$pred
         # onm <- predict(outcome, data=dat1,type="prob")[,2]
         
@@ -480,21 +480,21 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         Y_exp_test   <- as_tibble(Y_exp[test_indices,])
         colnames(Y_exp_test) <- colnames(Y_exp)
         
-        exposure <- SuperLearner(Y = Y_exp_train$A,
+        exposure <- SuperLearner(Y = Y_exp_train$x,
                                  X = X_exp_train,
                                  family = binomial(),
                                  SL.library = sl_binomial)
         
         
-        X_exp_test$Y <- 0 ## setting Y=0
+        X_exp_test$y <- 0 ## setting y=0
         enm <- predict(exposure, newdata = X_exp_test)$pred
         # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
         
-        d.diff <- (-1)^(Y_out_test$Y+Y_exp_test$A) ## Eric's suggestion, for Y,A binary
+        d.diff <- (-1)^(Y_out_test$y+Y_exp_test$x) ## Eric's suggestion, for y,x binary
         
         # build estimate function
         estimating_function <- function(psi){
-          estf = d.diff*h.dag / (exp(psi*Y_out_test$Y*Y_exp_test$A)*onm*enm)
+          estf = d.diff*h.dag / (exp(psi*Y_out_test$y*Y_exp_test$x)*onm*enm)
           return(estf)
         }
         
@@ -506,12 +506,12 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         res <- tryCatch({
           if (root == "uni") {
             # U <- function(psi, onm, enm, d.diff) { 
-            #   sum(d.diff * h.dag / (exp(psi * Y_out_test$Y * Y_exp_test$A) * onm * enm)) 
+            #   sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
             # }
             # est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, maxiter = 1000, onm = onm, enm = enm, d.diff = d.diff)
             # est$root
             U <- function(psi) { 
-              sum(d.diff * h.dag / (exp(psi * Y_out_test$Y * Y_exp_test$A) * onm * enm)) 
+              sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
               
             }
             par.init <- c(0)
@@ -563,14 +563,14 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         Y_out_test   <- as_tibble(Y_out[test_indices,])
         colnames(Y_out_test) <- colnames(Y_out)
         
-        Y_out_train$Y1 <- Y_out_train$Y
-        outcome <- SuperLearner(Y = Y_out_train$Y1,
+        Y_out_train$y1 <- Y_out_train$y
+        outcome <- SuperLearner(Y = Y_out_train$y1,
                                 X = X_out_train,
                                 family = gaussian(),
                                 SL.library = sl_gaussian)
         
         
-        X_out_test$A <- 0 ## setting A=0
+        X_out_test$x <- 0 ## setting x=0
         # onm <- predict(outcome, data=dat1,type="response")$prediction
         onm <- predict(outcome, newdata = X_out_test)$pred
       }else{
@@ -586,13 +586,13 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         Y_out_test   <- as_tibble(Y_out[test_indices,])
         colnames(Y_out_test) <- colnames(Y_out)
         
-        outcome <- SuperLearner(Y =Y_out_train$Y,
+        outcome <- SuperLearner(Y =Y_out_train$y,
                                 X = X_out_train,
                                 family = binomial(),
                                 SL.library = sl_binomial)
         
         
-        X_out_test$A <- 0 ## setting A=0
+        X_out_test$x <- 0 ## setting x=0
         onm <- predict(outcome, newdata = X_out_test)$pred
         # onm <- predict(outcome, data=dat1,type="prob")[,2]
       }
@@ -611,13 +611,13 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         Y_exp_test   <- as_tibble(Y_exp[test_indices,])
         colnames(Y_exp_test) <- colnames(Y_exp)
         
-        Y_exp_train$A1 <- Y_exp_train$A
-        exposure <- SuperLearner(Y = Y_exp_train$A1,
+        Y_exp_train$x1 <- Y_exp_train$x
+        exposure <- SuperLearner(Y = Y_exp_train$x1,
                                  X = X_exp_train,
                                  family = gaussian(),
                                  SL.library = sl_gaussian)
         
-        X_exp_test$Y <- 0 ## setting Y=0
+        X_exp_test$y <- 0 ## setting y=0
         # enm <- predict(exposure, data=dat2,type="response")$predictions
         enm <- predict(exposure, newdata = X_exp_test)$pred
         
@@ -634,13 +634,13 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
         Y_exp_test   <- as_tibble(Y_exp[test_indices,])
         colnames(Y_exp_test) <- colnames(Y_exp)
         
-        exposure <- SuperLearner(Y = Y_exp_train$A,
+        exposure <- SuperLearner(Y = Y_exp_train$x,
                                  X = X_exp_train,
                                  family = binomial(),
                                  SL.library = sl_binomial)
         
         
-        X_exp_test$Y <- 0 ## setting Y=0
+        X_exp_test$y <- 0 ## setting y=0
         enm <- predict(exposure, newdata = X_exp_test)$pred
         
       }
@@ -648,7 +648,7 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
       
       # build estimate function
       estimating_function <- function(psi){
-        estf = (Y_out_test$Y - onm)*(Y_exp_test$A - enm)*exp(-psi*Y_out_test$Y*Y_exp_test$A)
+        estf = (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x)
         return(estf)
       }
       
@@ -660,7 +660,7 @@ psi.hat_sl_2in1 <- function(Y, A, L=c(), subset = NULL, out.bin = TRUE, exp.bin 
       
       res <- tryCatch({
         if (root == "uni") {
-          U <- function(psi){ sum( (Y_out_test$Y - onm)*(Y_exp_test$A - enm)*exp(-psi*Y_out_test$Y*Y_exp_test$A) )}
+          U <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
           par.init <- c(0)
           sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
           sol$par
