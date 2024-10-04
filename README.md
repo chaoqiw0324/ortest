@@ -30,11 +30,11 @@ coverage](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.
 
 ## Overview
 
-The R package `ortest`… **{{ DESCRIBE YOUR PACKAGE }}**
+The R package `ortest` provides an odds ratio based conditional independence test for mixed data types, using nonparametric methods for nuisance estimation, including random forests, XGboost, and SuperLearner
 
 ## Features
 
-The main purpose of `ortest` is to… **{{ DESCRIBE THE MAIN FEATURES }}**
+The main purpose of `ortest` is to test conditional independence test for mixed data types including numeric, binary and multi-level factor, and to implemented in pc algorithm. 
 
 ## Installation
 
@@ -59,15 +59,7 @@ For an overview of the main features of `ortest`, please read the [Get
 started](https://chaoqiw0324.github.io/ortest/articles/ortest.html)
 vignette.
 
-## Long-form documentations
 
-`ortest` provides **{{ NUMBER OF VIGNETTES }}** vignettes to learn more
-about the package:
-
--   the [Get
-    started](https://chaoqiw0324.github.io/ortest/articles/ortest.html)
-    vignette describes the core features of the package
--   **{{ LIST ADDITIONAL VIGNETTES }}**
 
 ## Citation
 
@@ -87,10 +79,4 @@ Code of
 Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
 
-## Acknowledgments
 
-**{{ OPTIONAL SECTION }}**
-
-## References
-
-**{{ OPTIONAL SECTION }}**

@@ -1,6 +1,6 @@
 #' Regression or Super-Learning Based Conditional Independence Test
 #' 
-#' We test whether \code{x} and \code{y} are associated, given
+#' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model/ super learning method. 
 #' 
 #' @details All included variables should be either numeric or binary. If 
@@ -24,7 +24,7 @@ all_numeric <- function(df) {
   return(all_numeric)
 }
 
-psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, exp.scalar = FALSE, root = "uni"){
+psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = "uni"){
   ## Function: estimate the odds ratio parameter psi
   ## Input: 1. An outcome nuisance model, onm = f(y|L,x=0)
   ##        2. An exposure nuisance model, enm = g(x|y=0,L)
@@ -185,7 +185,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
   
 }
 
-psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, exp.scalar = FALSE, root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
+psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
   ## Function: estimate the odds ratio parameter psi
   ## Input: 1. An outcome nuisance model, onm = f(y|S,x=0)
   ##        2. An exposure nuisance model, enm = g(x|y=0,S)

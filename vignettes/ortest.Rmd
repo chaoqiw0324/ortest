@@ -1,19 +1,187 @@
 ---
-title: "Get started"
-output: rmarkdown::html_vignette
+title: "Using the Ortest package"
+author: Chaoqi Wu and Daniel Malinsky
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
 vignette: >
-  %\VignetteIndexEntry{Get started}
+  %\VignetteIndexEntry{Using the SSIndex package}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8}{inputenc}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE,
-                      comment  = "#>")
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+```{r default, include = FALSE}
+knitr::opts_chunk$set(prompt = TRUE, comment = "")
 ```
 
 
 ```{r setup}
 library(ortest)
+library(tidyverse)
+library(BB)
+library(lubridate)
+library(SuperLearner)
 ```
 
+In this vignette, we will introduce the main functions provided in  __`ortest`__ package, including `psi.hat_linear()`, `psi.hat_sl_2in1()`, `basic_function()`,`multi_level()` and `OR_test()`.
+
+## psi.hat
+
+In our package, we have two types of basic odds ratio estimation functions. The first one is `psi.hat_linear()`, using linear model for estimation. The second one is `psi.hat_sl_2in1()`, using super learner method for estimation. The users can assign the model used in super learner and the default models has already been assigned. Cross-fitting is also allowed for `psi.hat_sl_2in1()`.
+
+For these two psi.hat estimation method, the user needs to indicate whether the variable is binary or numeric. The following are some examples. The estimation and standard error of odds ratio will be returned.
+
+```{r}
+n <- 1000
+```
+
+This is the example of continuos outcome and binary exposure.
+
+```{r}
+L1 <- runif(n,0,1)
+L2 <- runif(n,0,1)
+L3 <- runif(n,0,1)
+L4 <- runif(n,0,1)
+L5 <- runif(n,0,1)
+L_vec <- tibble(
+  L1 = L1,
+  L2 = L2,
+  L3 = L3,
+  L4 = L4,
+  L5 = L5)
+  L.true <- 2*L1 + L2^2 + L1*L3 + 3*L4 + L1 * L5
+
+Z <- 0.5 + 0.5*L.true
+pr <- 1/(1+8*exp(-Z))
+summary(pr)
+# control the probability close to 0.5
+Y.true <- 2*Z + rnorm(n,0,1)
+A.true <- rbinom(n,1,pr)
+dat <- tibble(
+  Y = Y.true,
+  A = A.true
+) %>% cbind(L_vec)
+psi.hat_linear(y = dat$Y,x = dat$A,S = c(), subset = NULL, out.bin = FALSE, exp.bin = TRUE)
+psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = TRUE, sl=NULL,cross_fitting = FALSE,kfolds=5)
+psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = TRUE,sl=NULL,cross_fitting = TRUE, kfolds=5)
+
+
+```
+
+This is the example of continuous outcome and continuous exposure.
+
+```{r}
+L1 <- runif(n,0,1)
+L2 <- runif(n,0,1)
+L3 <- runif(n,0,1)
+L4 <- runif(n,0,1)
+L5 <- runif(n,0,1)
+L_vec <- tibble(
+  L1 = L1,
+  L2 = L2,
+  L3 = L3,
+  L4 = L4,
+  L5 = L5)
+L.true <- 2*L1 + L2^2 + L1*L3 + 3*L4 + L1 * L5
+# L.true <- 2*L1 + 3*L2 + 4*L3
+Z <- 0.5 + 0.5*L.true
+Y.true <- 2*Z + rnorm(n,0,3)
+A.true <- 2*Z + rnorm(n,0,3)
+dat <- tibble(
+  Y = Y.true,
+  A = A.true
+) %>% cbind(L_vec)
+
+l1 <- psi.hat_linear(Y = dat$Y,A = dat$A,L = c(), subset = NULL, out.bin = FALSE, exp.bin = FALSE, exp.scalar = TRUE)
+l2 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, exp.scalar = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
+l3 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, exp.scalar = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
+```
+
+This is the example of binary outcome and binary exposure.
+
+```{r}
+  L1 <- runif(n,0,1)
+  L2 <- runif(n,0,1)
+  L3 <- runif(n,0,1)
+  L4 <- runif(n,0,1)
+  L5 <- runif(n,0,1)
+  L_vec <- tibble(
+    L1 = L1,
+    L2 = L2,
+    L3 = L3,
+    L4 = L4,
+    L5 = L5)
+  L.true <- 2*L1 + L2^2 + L1*L3 + 3*L4 + L1 * L5
+  Z <- 0.5 + 0.5*L.true
+  pr <- 1/(1+8*exp(-Z))
+  summary(pr)
+  Y.true <- rbinom(n,1,pr)
+  A.true <- rbinom(n,1,pr)
+  dat <- tibble(
+    Y = Y.true,
+    A = A.true
+  ) %>% cbind(L_vec)
+
+l1 <- psi.hat_linear(Y = dat$Y,A = dat$A,L = c(), subset = NULL, out.bin = TRUE, exp.bin = TRUE, exp.scalar = TRUE)
+l2 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE, exp.scalar = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
+l3 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE, exp.scalar = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
+```
+
+
+
+## OR_test
+
+`OR_test()` detect whether the variable is binary or numeric. Thus the user only needs to input the x,y and S. It can also be used for multi-level factor. For variables in S is more than 4, the super learner is used or the linear method is applied. Super learner models can be assigned in `suffStat` or user can use the default models. Cross fitting is only allowed in super learner or the error would be reported. The detail of Super learner is set in `suffStat`.
+
+Moreover, `OR_test()` also detect multi-level factor. The factor which the levels are more than two and less than five will be considered as multi-level factor. Multi-level factor will be converted dummy variable and multi model will be fit. The largest estimation of odds ratio and its standard error will be returned.
+
+```{r}
+## c to m
+ORtest(1,5,c(2:4,6:10),list(dat = data, sl=NULL,cross_fitting=FALSE,kfolds=5))
+ORtest(1,5,c(2:4,6:10),list(dat = data, sl=NULL,cross_fitting=TRUE,kfolds=5))
+
+## m to b 
+ORtest(5,2,c(1,3:4,6:10),list(dat = data, sl=NULL,cross_fitting=FALSE,kfolds=5))
+ORtest(5,2,c(1,3:4,6:10),list(dat = data, sl=NULL,cross_fitting=TRUE,kfolds=5))
+
+## m to m
+ORtest(5,6,c(1:4,7:10),list(dat = data, sl=NULL,cross_fitting=FALSE,kfolds=5))
+ORtest(5,6,c(1:4,7:10),list(dat = data, sl=NULL,cross_fitting=TRUE,kfolds=5))
+
+```
+
+The `OR_test` can be passed to pc algorithm for independence test.
+
+```{r}
+V <- colnames(data)
+
+# suffStat = list(dat = data,sl=NULL,cross_fitting=FALSE,kfolds=5)
+# indepTest=ORtest_single
+# alpha=0.01
+# labels=V
+# skel.method = "stable"
+# fixedGaps=NULL
+# fixedEdges=NULL
+# NAdelete=TRUE
+# m.max=Inf
+# numCores=1
+# verbose=TRUE
+# skeleton(suffStat, indepTest, alpha, labels = labels,
+#     method = skel.method, fixedGaps = fixedGaps, fixedEdges = fixedEdges,
+#     NAdelete = NAdelete, m.max = m.max, numCores = numCores,
+#     verbose = verbose)
+
+pc.fit <- pc(suffStat = list(dat = data,sl=NULL,cross_fitting=FALSE,kfolds=5),
+             indepTest = ORtest_single, ## indep.test: partial correlations
+             alpha=0.01, labels = V, verbose = TRUE)
+plot(pc.fit)
+```
