@@ -188,6 +188,38 @@ multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
   return(res)
   
 }
+ORtest <- function(x,y,S,suffStat) {
+  
+  # Extract the positions of X, Y, and Z from the location vector
+  x_pos <- x
+  y_pos <- y
+  z_pos <- S
+  
+  # Ensure that X and Y positions are different
+  if (x_pos == y_pos) {
+    stop("X and Y should be at different positions.")
+  }
+  dat <- suffStat$dat
+  sl <- suffStat$sl
+  cross_fitting <- suffStat$cross_fitting
+  kfolds <- suffStat$kfolds
+  
+  
+  ### p value 1
+  # Extract X, Y, and Z variables from the dataframe
+  X <- dat[, x_pos]
+  Y <- dat[, y_pos]
+  Z <- dat[, z_pos]
+  res1 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  ### p value 2
+  # Extract X, Y, and Z variables from the dataframe
+  Y <- dat[, x_pos]
+  X <- dat[, y_pos]
+  Z <- dat[, z_pos]
+  res2 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  # Return the X, Y, and Z variables in a list
+  return(list(res1,res2))
+}
 
 ORtest_single <- function(x,y,S,suffStat) {
   

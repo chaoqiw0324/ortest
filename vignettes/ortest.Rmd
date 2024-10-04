@@ -24,13 +24,964 @@ knitr::opts_chunk$set(prompt = TRUE, comment = "")
 ```
 
 
-```{r setup}
+```{r setup,echo=FALSE,message=FALSE}
 library(ortest)
 library(tidyverse)
 library(BB)
 library(lubridate)
 library(SuperLearner)
+library(pcalg)
 ```
+
+```{r,echo=FALSE,message=FALSE}
+all_numeric <- function(df) {
+  all_numeric <- all(sapply(df, is.numeric))
+  return(all_numeric)
+}
+
+psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = "uni"){
+  ## Function: estimate the odds ratio parameter psi
+  ## Input: 1. An outcome nuisance model, onm = f(y|L,x=0)
+  ##        2. An exposure nuisance model, enm = g(x|y=0,L)
+  ## Output: A real number (vector) psi.hat, an estimate of the conditional odds ratio parameter psi
+  
+  
+  if(length(S)==0){
+    fm_out <- "y ~ x"
+    fm_out <- as.formula(fm_out)
+    fm_exp <- "x ~ y"
+    fm_exp <- as.formula(fm_exp) ## for cases where conditioning set is empty
+    dat <- data.frame(y,x)
+  }else{
+    covnames <- colnames(S)
+    fm_out <- paste0("y ~ x + ", paste(covnames, collapse = "+"))
+    fm_out <- as.formula(fm_out)
+    fm_exp <- paste0("x ~ y + ", paste(covnames, collapse = "+"))
+    fm_exp <- as.formula(fm_exp)
+    dat <- data.frame(y,x,S)
+  }
+  
+  
+  if(!is.null(subset)) y <- y[subset]
+  if(!is.null(subset)) x <- x[subset,]
+  if(!is.null(subset)) S <- S[subset,]
+  #temp
+  
+  
+  refx <- 0 
+  refy <- 0
+  
+  if(out.bin && exp.bin){
+    h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
+    dat1 <- dat
+    dat2 <- dat
+    
+    outcome <- glm(fm_out,family=binomial,data = dat)
+    dat1$x <- 0 ## setting x=0
+    onm <- predict.glm(outcome, newdata=dat1,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
+    onm[y==0] <- 1-onm[y==0]
+    
+    exposure <- glm(fm_exp, family = binomial,data = dat)
+    dat2$y <- 0 ## setting y=0
+    enm <- predict.glm(exposure, newdata=dat2,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
+    enm[x==0] <- 1-enm[x==0]
+    
+    d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
+    
+    # build estimate function
+    estimating_function <- function(psi){
+      estf = d.diff*h.dag / (exp(psi*y*x)*onm*enm)
+      return(estf) 
+    }
+    
+    estimating_equation <- function(psi){
+      estf = estimating_function(psi)         
+      este = sum(estf)                       
+      return(este)
+    }
+    
+    
+    res <- tryCatch({
+      if (root == "uni") {
+        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+        est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+        res <-  est$root
+      }else if(root == "multi"){
+        proc <- rootSolve::multiroot(f = estimating_equation,     
+                                     start = c(-3.0))
+        res <- proc$root
+      }
+    }, error = function(e) {
+      # If an error occurs, set res to zero
+      cat("Error encountered: ", conditionMessage(e), "\n")
+      0
+    })
+    
+    # Baking the bread (approximate derivative)
+    deriv <- numDeriv::jacobian(func = estimating_equation,   
+                                x = res)              
+    bread <- -1*deriv / n
+    
+    # Cooking the filling (matrix algebra)
+    outerprod <- sum(estimating_function(res) * estimating_function(res)) 
+    # alternative code using matrix algebra
+    # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root) 
+    filling <- outerprod/n 
+    
+    # Assembling the sandwich (matrix algebra)
+    sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+    se <- as.numeric(sqrt(sandwich / n))
+    
+    result <- c(res,se)
+    return(result)
+  }
+  
+  if(!out.bin){ 
+    outcome <- glm(fm_out, family = gaussian,data = dat)
+  } else outcome <- glm(fm_out, family = binomial,data = dat)
+  dat1 <- dat
+  dat1$x <- 0 ## setting x=0
+  onm <- predict.glm(outcome, newdata=dat1,type="response")
+  
+  
+  if(!exp.bin){
+    exposure <- glm(fm_exp, family = gaussian,data = dat)
+  } else exposure <- glm(fm_exp, family = binomial,data = dat)
+  dat2 <- dat
+  dat2$y <- 0 ## setting y=0
+  enm <- predict.glm(exposure, newdata=dat2,type="response")
+  
+  
+  
+  #U <- function(psi,onm,enm){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+  #est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, onm = onm, enm = enm)
+  #return(est$root)
+  
+  # build estimate function
+  estimating_function <- function(psi){
+    estf = (y - onm)*(x - enm)*exp(-psi*y*x) 
+    return(estf) 
+  }
+  
+  estimating_equation <- function(psi){
+    estf = estimating_function(psi)         
+    este = sum(estf)                       
+    return(este)
+  }   
+  
+  if (root == "uni") {
+    U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+    par.init <- c(0)
+    sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+    res <- sol$par
+  }else if(root == "multi"){
+    proc <- rootSolve::multiroot(f = estimating_equation,     
+                                 start = c(-3.0))
+    res <- proc$root
+  }
+  
+  # Baking the bread (approximate derivative)
+  deriv <- numDeriv::jacobian(func = estimating_equation,   
+                              x = res)              
+  bread <- -1*deriv / n
+  
+  # Cooking the filling (matrix algebra)
+  outerprod <- sum(estimating_function(res) * estimating_function(res)) 
+  # alternative code using matrix algebra
+  # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root) 
+  filling <- outerprod/n 
+  
+  # Assembling the sandwich (matrix algebra)
+  sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+  se <- as.numeric(sqrt(sandwich / n))
+  
+  result <- c(res,se)
+  return(result)
+  
+}
+
+psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
+  ## Function: estimate the odds ratio parameter psi
+  ## Input: 1. An outcome nuisance model, onm = f(y|S,x=0)
+  ##        2. An exposure nuisance model, enm = g(x|y=0,S)
+  ## Output: A real number (vector) psi.hat_ranger, an estimate of the conditional odds ratio parameter psi
+  
+  ## Todo: generalize estimating eq to arbitrary dimensions
+  
+  X_exp <- data.frame(y, S)
+  Y_exp <- data.frame(x)
+  X_out <- data.frame(x, S)
+  Y_out <- data.frame(y)
+  
+  
+  if (!is.null(subset)) y <- y[subset]
+  if (!is.null(subset)) x <- x[subset,]
+  if (!is.null(subset)) S <- S[subset,]
+  #temp
+  
+  
+  refx <- 0 
+  refy <- 0
+  
+  
+  allowed_methods <- c(
+    "SL.bartMachine", "SL.bayesglm", "SL.biglasso", "SL.caret", "SL.caret.rpart", 
+    "SL.cforest", "SL.earth", "SL.gam", "SL.gbm", "SL.glm", "SL.glm.interaction", 
+    "SL.glmnet", "SL.ipredbagg", "SL.kernelKnn", "SL.knn", "SL.ksvm", "SL.lda", 
+    "SL.leekasso", "SL.lm", "SL.loess", "SL.logreg", "SL.mean", "SL.nnet", 
+    "SL.nnls", "SL.polymars", "SL.qda", "SL.randomForest", "SL.ranger", 
+    "SL.ridge", "SL.rpart", "SL.rpartPrune", "SL.speedglm", "SL.speedlm", 
+    "SL.step", "SL.step.forward", "SL.step.interaction", "SL.stepAIC", "SL.svm", 
+    "SL.template", "SL.xgboost"
+  )
+  
+  # Check if all elements in 'sl' exist in allowed methods
+  if (!all(sl %in% allowed_methods)) {
+    stop("Some elements in 'sl' do not exist in the list of allowed methods.")
+  }
+  sl_bin <- c("SL.lda","SL.mean","SL.earth", "SL.ranger","SL.xgboost")
+  sl_gau <- c("SL.glm","SL.mean","SL.earth", "SL.ranger","SL.xgboost")
+  if(! is.null(sl)){
+    # Combine 'sl' with 'sl_existing'
+    sl_binomial <- sl
+    sl_gaussian <- sl
+  }else{
+    sl_binomial <- unique(c(sl_bin, sl))
+    sl_gaussian <- unique(c(sl_gau, sl))
+  }
+  
+  if (cross_fitting==FALSE) {
+    ################################ No Cross_Fitting
+    
+    
+    if(out.bin && exp.bin){
+      h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
+      # outcome 
+      ## outcome tune parameter 
+      
+      X_out_new <- X_out
+      Y_out1 <- Y_out
+      outcome <- SuperLearner(Y =Y_out1$y,
+                              X = X_out,
+                              family = binomial(),
+                              SL.library = sl_binomial)
+      
+      X_out_new$x <- 0 ## setting x=0
+      onm <- predict(outcome, X=X_out_new)$pred
+      # onm <- predict(outcome, data=dat1,type="prob")[,2]
+      onm[y==0] <- 1-onm[y==0]
+      
+      # exposure 
+      # exposure tune parameter
+      
+      X_exp_new <- X_exp
+      Y_exp1 <- Y_exp
+      
+      exposure <- SuperLearner(Y = Y_exp1$x,
+                               X = X_exp,
+                               family = binomial(),
+                               SL.library = sl_binomial)
+      X_exp_new$y <- 0 ## setting y=0
+      enm <- predict(exposure, X = X_exp_new)$pred
+      # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
+      enm[x==0] <- 1-enm[x==0]
+      
+      
+      d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
+      # build estimate function
+      estimating_function <- function(psi){
+        estf = d.diff*h.dag / (exp(psi*y*x)*onm*enm)
+        return(estf) 
+      }
+      
+      estimating_equation <- function(psi){
+        estf = estimating_function(psi)         
+        este = sum(estf)                       
+        return(este)
+      }
+      
+      
+      res <- tryCatch({
+        if (root == "uni") {
+          U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+          est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+          res <-  est$root
+        }else if(root == "multi"){
+          proc <- rootSolve::multiroot(f = estimating_equation,     
+                                       start = c(-3.0))
+          res <- proc$root
+        }
+      }, error = function(e) {
+        # If an error occurs, set res to zero
+        cat("Error encountered: ", conditionMessage(e), "\n")
+        0
+      })      
+      
+      # Baking the bread (approximate derivative)
+      deriv <- numDeriv::jacobian(func = estimating_equation,   
+                                  x = res)              
+      bread <- -1*deriv / n
+      
+      # Cooking the filling (matrix algebra)
+      outerprod <- sum(estimating_function(res) * estimating_function(res)) 
+      # alternative code using matrix algebra
+      # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root) 
+      filling <- outerprod/n 
+      
+      # Assembling the sandwich (matrix algebra)
+      sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+      se <- as.numeric(sqrt(sandwich / n))
+      
+      result <- c(res,se)
+      return(result)
+    }
+    
+    
+    
+    
+    # at least one variable is non-bianry  
+    
+    if(!out.bin){
+      
+      X_out_new <- X_out
+      Y_out$y1 <- (Y_out$y-mean(Y_out$y))/sd(Y_out$y)
+      
+      
+      outcome <- SuperLearner(Y = Y_out$y1,
+                              X = X_out,
+                              family = gaussian(),
+                              SL.library = sl_gaussian)
+      # onm <- predict(outcome, data=dat1,type="response")$prediction
+      onm <- predict(outcome, X = X_out_new)$pred
+      onm <- onm*sd(Y_out$y)+mean(Y_out$y)
+    }else{
+      
+      X_out_new <- X_out
+      Y_out1 <- Y_out
+      outcome <- SuperLearner(Y =Y_out1$y,
+                              X = X_out,
+                              family = binomial(),
+                              SL.library = sl_binomial)
+      
+      X_out_new$x <- 0 ## setting x=0
+      onm <- predict(outcome, X = X_out_new)$pred
+      # onm <- predict(outcome, data=dat1,type="prob")[,2]
+      onm[y == 0] <- 1 - onm[y == 0]
+    }
+    
+    
+    if(!exp.bin){
+      X_exp_new <- X_exp
+      Y_exp$x1 <- (Y_exp$x-mean(Y_exp$x))/sd(Y_exp$x)
+      
+      
+      
+      exposure <- SuperLearner(Y = Y_exp$x1,
+                               X = X_exp,
+                               family = gaussian(),
+                               SL.library = sl_gaussian)
+      X_exp_new$y <- 0 ## setting y=0
+      # enm <- predict(exposure, data=dat2,type="response")$predictions
+      enm <- predict(exposure, X = X_exp_new)$pred
+      enm <- enm*sd(Y_exp$x)+mean(Y_exp$x)
+    }else{
+      X_exp_new <- X_exp
+      Y_exp1 <- Y_exp
+      
+      exposure <- SuperLearner(Y = Y_exp1$x,
+                               X = X_exp,
+                               family = binomial(),
+                               SL.library = sl_binomial)
+      X_exp_new$y <- 0 ## setting Y=0
+      enm <- predict(exposure, X=X_exp_new)$pred
+      # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
+      enm[x == 0] <- 1 - enm[x == 0]
+    }
+    
+    # build estimate function
+    estimating_function <- function(psi){
+      estf = (y - onm)*(x - enm)*exp(-psi*y*x) 
+      return(estf) 
+    }
+    
+    estimating_equation <- function(psi){
+      estf = estimating_function(psi)         
+      este = sum(estf)                       
+      return(este)
+    }   
+    
+    
+    res <- tryCatch({
+      if (root == "uni") {
+        U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+        par.init <- c(0)
+        sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+        res <- sol$par
+      }else if(root == "multi"){
+        proc <- rootSolve::multiroot(f = estimating_equation,     
+                                     start = c(-3.0))
+        res <- proc$root
+      }
+    }, error = function(e) {
+      # If an error occurs, set res to zero
+      cat("Error encountered: ", conditionMessage(e), "\n")
+      0
+    })    
+    # Baking the bread (approximate derivative)
+    deriv <- numDeriv::jacobian(func = estimating_equation,   
+                                x = res)              
+    bread <- -1*deriv / n
+    
+    # Cooking the filling (matrix algebra)
+    outerprod <- sum(estimating_function(res) * estimating_function(res)) 
+    # alternative code using matrix algebra
+    # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root) 
+    filling <- outerprod/n 
+    
+    # Assembling the sandwich (matrix algebra)
+    sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+    se <- as.numeric(sqrt(sandwich / n))
+    
+    result <- c(res,se)
+    return(result)  
+    
+    
+    
+  }else{
+    ################################ Cross_Fitting   
+    set.seed(2024)
+    folds <- createFolds(dat$y, k = kfolds, list = TRUE, returnTrain = FALSE)
+    predictions <- vector("list", kfolds)
+    
+    for (i in 1:kfolds) {
+      # Split the data into training and test sets
+      test_indices <- folds[[i]]
+      train_indices <- setdiff(1:nrow(dat), test_indices)
+      
+      if(out.bin && exp.bin){
+        h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
+        X_out_train  <- as_tibble(X_out[train_indices,])
+        colnames(X_out_train) <- colnames(X_out)
+        
+        X_out_test   <- as_tibble(X_out[test_indices,])
+        colnames(X_out_test) <- colnames(X_out)
+        
+        Y_out_train  <- as_tibble(Y_out[train_indices,])
+        colnames(Y_out_train) <- colnames(Y_out)
+        
+        Y_out_test   <- as_tibble(Y_out[test_indices,])
+        colnames(Y_out_test) <- colnames(Y_out)
+        
+        outcome <- SuperLearner(Y =Y_out_train$y,
+                                X = X_out_train,
+                                family = binomial(),
+                                SL.library = sl_binomial)
+        
+        X_out_test$x <- 0 ## setting x=0
+        onm <- predict(outcome, newdata=X_out_test)$pred
+        # onm <- predict(outcome, data=dat1,type="prob")[,2]
+        
+        # exposure 
+        # exposure tune parameter
+        X_exp_train  <- as_tibble(X_exp[train_indices,])
+        colnames(X_exp_train) <- colnames(X_exp)
+        
+        X_exp_test   <- as_tibble(X_exp[test_indices,])
+        colnames(X_exp_test) <- colnames(X_exp)
+        
+        Y_exp_train  <- as_tibble(Y_exp[train_indices,])
+        colnames(Y_exp_train) <- colnames(Y_exp)
+        
+        Y_exp_test   <- as_tibble(Y_exp[test_indices,])
+        colnames(Y_exp_test) <- colnames(Y_exp)
+        
+        exposure <- SuperLearner(Y = Y_exp_train$x,
+                                 X = X_exp_train,
+                                 family = binomial(),
+                                 SL.library = sl_binomial)
+        
+        
+        X_exp_test$y <- 0 ## setting y=0
+        enm <- predict(exposure, newdata = X_exp_test)$pred
+        # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
+        
+        d.diff <- (-1)^(Y_out_test$y+Y_exp_test$x) ## Eric's suggestion, for y,x binary
+        
+        # build estimate function
+        estimating_function <- function(psi){
+          estf = d.diff*h.dag / (exp(psi*Y_out_test$y*Y_exp_test$x)*onm*enm)
+          return(estf)
+        }
+        
+        estimating_equation <- function(psi){
+          estf = estimating_function(psi)
+          este = sum(estf)
+          return(este)
+        }
+        res <- tryCatch({
+          if (root == "uni") {
+            # U <- function(psi, onm, enm, d.diff) { 
+            #   sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
+            # }
+            # est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, maxiter = 1000, onm = onm, enm = enm, d.diff = d.diff)
+            # est$root
+            U <- function(psi) { 
+              sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
+              
+            }
+            par.init <- c(0)
+            sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+            sol$par
+          } else if (root == "multi") {
+            proc <- rootSolve::multiroot(f = estimating_equation, start = c(-3.0))
+            proc$root
+          }
+        }, error = function(e) {
+          # If an error occurs, set res to zero
+          cat("Error encountered: ", conditionMessage(e), "\n")
+          0
+        })
+        
+        # Baking the bread (approximate derivative)
+        deriv <- numDeriv::jacobian(func = estimating_equation,
+                                    x = res)
+        bread <- -1*deriv / (n/kfolds)
+        
+        # Cooking the filling (matrix algebra)
+        outerprod <- sum(estimating_function(res) * estimating_function(res))
+        # alternative code using matrix algebra
+        # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root)
+        filling <- outerprod/(n/kfolds)
+        
+        # Assembling the sandwich (matrix algebra)
+        sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+        se <- as.numeric(sqrt(sandwich / (n/kfolds))) 
+        result <- c(res,se)
+        
+        predictions[[i]] <- data.frame(
+          result = res,
+          se = se
+        )
+        next
+      }
+      
+      if(!out.bin){
+        X_out_train  <- as_tibble(X_out[train_indices,])
+        colnames(X_out_train) <- colnames(X_out)
+        
+        X_out_test   <- as_tibble(X_out[test_indices,])
+        colnames(X_out_test) <- colnames(X_out)
+        
+        Y_out_train  <- as_tibble(Y_out[train_indices,])
+        colnames(Y_out_train) <- colnames(Y_out)
+        
+        Y_out_test   <- as_tibble(Y_out[test_indices,])
+        colnames(Y_out_test) <- colnames(Y_out)
+        
+        Y_out_train$y1 <- Y_out_train$y
+        outcome <- SuperLearner(Y = Y_out_train$y1,
+                                X = X_out_train,
+                                family = gaussian(),
+                                SL.library = sl_gaussian)
+        
+        
+        X_out_test$x <- 0 ## setting x=0
+        # onm <- predict(outcome, data=dat1,type="response")$prediction
+        onm <- predict(outcome, newdata = X_out_test)$pred
+      }else{
+        X_out_train  <- as_tibble(X_out[train_indices,])
+        colnames(X_out_train) <- colnames(X_out)
+        
+        X_out_test   <- as_tibble(X_out[test_indices,])
+        colnames(X_out_test) <- colnames(X_out)
+        
+        Y_out_train  <- as_tibble(Y_out[train_indices,])
+        colnames(Y_out_train) <- colnames(Y_out)
+        
+        Y_out_test   <- as_tibble(Y_out[test_indices,])
+        colnames(Y_out_test) <- colnames(Y_out)
+        
+        outcome <- SuperLearner(Y =Y_out_train$y,
+                                X = X_out_train,
+                                family = binomial(),
+                                SL.library = sl_binomial)
+        
+        
+        X_out_test$x <- 0 ## setting x=0
+        onm <- predict(outcome, newdata = X_out_test)$pred
+        # onm <- predict(outcome, data=dat1,type="prob")[,2]
+      }
+      
+      
+      if(!exp.bin){
+        X_exp_train  <- as_tibble(X_exp[train_indices,])
+        colnames(X_exp_train) <- colnames(X_exp)
+        
+        X_exp_test   <- as_tibble(X_exp[test_indices,])
+        colnames(X_exp_test) <- colnames(X_exp)
+        
+        Y_exp_train  <- as_tibble(Y_exp[train_indices,])
+        colnames(Y_exp_train) <- colnames(Y_exp)
+        
+        Y_exp_test   <- as_tibble(Y_exp[test_indices,])
+        colnames(Y_exp_test) <- colnames(Y_exp)
+        
+        Y_exp_train$x1 <- Y_exp_train$x
+        exposure <- SuperLearner(Y = Y_exp_train$x1,
+                                 X = X_exp_train,
+                                 family = gaussian(),
+                                 SL.library = sl_gaussian)
+        
+        X_exp_test$y <- 0 ## setting y=0
+        # enm <- predict(exposure, data=dat2,type="response")$predictions
+        enm <- predict(exposure, newdata = X_exp_test)$pred
+        
+      }else{
+        X_exp_train  <- as_tibble(X_exp[train_indices,])
+        colnames(X_exp_train) <- colnames(X_exp)
+        
+        X_exp_test   <- as_tibble(X_exp[test_indices,])
+        colnames(X_exp_test) <- colnames(X_exp)
+        
+        Y_exp_train  <- as_tibble(Y_exp[train_indices,])
+        colnames(Y_exp_train) <- colnames(Y_exp)
+        
+        Y_exp_test   <- as_tibble(Y_exp[test_indices,])
+        colnames(Y_exp_test) <- colnames(Y_exp)
+        
+        exposure <- SuperLearner(Y = Y_exp_train$x,
+                                 X = X_exp_train,
+                                 family = binomial(),
+                                 SL.library = sl_binomial)
+        
+        
+        X_exp_test$y <- 0 ## setting y=0
+        enm <- predict(exposure, newdata = X_exp_test)$pred
+        
+      }
+      
+      
+      # build estimate function
+      estimating_function <- function(psi){
+        estf = (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x)
+        return(estf)
+      }
+      
+      estimating_equation <- function(psi){
+        estf = estimating_function(psi)
+        este = sum(estf)
+        return(este)
+      }
+      
+      res <- tryCatch({
+        if (root == "uni") {
+          U <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
+          par.init <- c(0)
+          sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+          sol$par
+        } else if (root == "multi") {
+          proc <- rootSolve::multiroot(f = estimating_equation, start = c(-3.0))
+          proc$root
+        }
+      }, error = function(e) {
+        # If an error occurs, set res to zero
+        cat("Error encountered: ", conditionMessage(e), "\n")
+        0
+      })
+      
+      # Baking the bread (approximate derivative)
+      deriv <- numDeriv::jacobian(func = estimating_equation,
+                                  x = res)
+      bread <- -1*deriv / (n/kfolds)
+      
+      # Cooking the filling (matrix algebra)
+      outerprod <- sum(estimating_function(res) * estimating_function(res))
+      # alternative code using matrix algebra
+      # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root)
+      filling <- outerprod/(n/kfolds)
+      
+      # Assembling the sandwich (matrix algebra)
+      sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+      se <- as.numeric(sqrt(sandwich /(n/kfolds)))
+      
+      predictions[[i]] <- data.frame(
+        result = res,
+        se = se
+      )
+    }# end of loop
+    
+    ## harmonize folds result and calculate the sd
+    
+    all_predictions <- do.call(rbind, predictions)
+    res <- median(all_predictions$result)
+    var <- median(all_predictions$se^2+(all_predictions$result-mean(all_predictions$result))^2)
+    sd <- var^(1/2)
+    return(c(res,sd))
+    
+  }  
+  
+  
+}
+basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
+  # Check if x and y are binary or continuous
+  if(! is.numeric(x) | ! is.numeric(y)){
+    cat("The x and y must be numeric data")
+  }
+  if(! all_numeric(S)){
+    cat("The S must be numeric data or empty")
+  }
+  is_binary_x <- FALSE
+  
+  is_binary_y <- FALSE
+  # Check if the variable is a factor with exactly two levels
+  if (is.factor(x) && nlevels(x) == 2) {
+    # Convert factor to numeric 0 and 1
+    x <- as.numeric(x) - 1
+    is_binary_x <- TRUE
+  }
+  
+  # Check if the variable is numeric with exactly two unique values
+  if (is.numeric(x) && length(unique(x)) == 2) {
+    # Identify the two unique values
+    unique_values <- unique(x)
+    # Convert to 0 and 1
+    x <- ifelse(x == unique_values[1], 0, 1)
+    is_binary_x <- TRUE
+  }
+  
+  # Check if the variable is a factor with exactly two levels
+  if (is.factor(y) && nlevels(y) == 2) {
+    # Convert factor to numeric 0 and 1
+    y <- as.numeric(y) - 1
+    is_binary_y <- TRUE
+  }
+  
+  # Check if the variable is numeric with exactly two unique values
+  if (is.numeric(y) && length(unique(y)) == 2) {
+    # Identify the two unique values
+    unique_values <- unique(y)
+    # Convert to 0 and 1
+    y <- ifelse(y == unique_values[1], 0, 1)
+    is_binary_y <- TRUE
+  }
+  S2 <- as_tibble(S)
+  colnames(S2) <- paste0("X", colnames(S2))
+  is_big_S <- FALSE
+  if(is.null(S2)){
+    is_big_S <- FALSE
+  }else{
+    is_big_S <- ifelse( ncol(S2) > 4,TRUE, FALSE)
+  }
+  # Check if the dimension of S is big (> 4)
+  
+  
+  if (is_binary_x) {
+    exp_bin = TRUE
+  } else {
+    exp_bin = FALSE
+  }
+  
+  if (is_binary_y) {
+    out_bin = TRUE
+  } else {
+    out_bin = FALSE
+  }
+  
+  roots="uni"
+  
+  if(is_big_S){
+    res <- psi.hat_sl_2in1(y=y,x=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+  }else{
+    if (!cross_fitting) {
+      res <- psi.hat_linear(y=y,x=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,root=roots)
+    }else{
+      cat("The cross-fitting is not available for columns of S is smaller than 4")  
+    }
+    
+    
+  }
+  # Two-sided p-value
+  # estimate <- res[1]
+  # sd_estimate <- res[2]
+  # S <- (estimate - 0) / sd_estimate
+  # 
+  # # Calculate two-sided p-value
+  # p_value_two_sided <- 2 * pnorm(-abs(S))
+  # 
+  # # Output
+  # return(list(p_value = p_value_two_sided, alpha = alpha, independent = p_value_two_sided > alpha))
+  return(res)
+}
+
+multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
+  # Check if x and y are binary or continuous
+  if(! is.numeric(x) | ! is.numeric(y)){
+    cat("The x and y must be numeric data")
+  }
+  if(! all_numeric(S)){
+    cat("The S must be numeric data or empty")
+  }
+  dat_y <- NULL
+  dat_x <- NULL
+  # If the variable is a factor with more than one level
+  if (is.factor(y) && nlevels(y) > 2) {
+    # Use model.matrix to create dummy variables
+    dummies <- model.matrix(~ y - 1)
+    colnames(dummies) <- paste0("y", "_", levels(y))
+    dat_y <- as.data.frame(dummies)
+  }
+  
+  # If the variable is numeric with less than 5 unique values
+  if (is.numeric(y) && length(unique(y)) > 2 && length(unique(y)) < 5) {
+    # Convert numeric to factor first and then create dummy variables
+    y <- factor(y)
+    dummies <- model.matrix(~ y - 1)
+    colnames(dummies) <- paste0("y", "_", levels(y))
+    dat_y <- as.data.frame(dummies)
+  } 
+  
+  # If the variable is a factor with more than one level
+  if (is.factor(x) && nlevels(x) > 2) {
+    # Use model.matrix to create dummy variables
+    dummies <- model.matrix(~ x - 1)
+    colnames(dummies) <- paste0("x", "_", levels(x))
+    dat_x <- as.data.frame(dummies)
+  }
+  
+  # If the variable is numeric with less than 5 unique values
+  if (is.numeric(x) && length(unique(x)) > 2 && length(unique(x)) < 5) {
+    # Convert numeric to factor first and then create dummy variables
+    x <- factor(x)
+    dummies <- model.matrix(~ x - 1)
+    colnames(dummies) <- paste0("x", "_", levels(x))
+    dat_x <- as.data.frame(dummies)
+  } 
+  ########################################  
+  if(is.null(dat_y)){
+    if (is.null(dat_x)) {
+      res <- basic_function(x, y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+    }else{
+      num_x <- ncol(dat_x)
+      result <- matrix(nrow = num_x,ncol=2)
+      for (i in 1:num_x) {
+        res <- basic_function(dat_x[,i], y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+        result[i,1] <- res[1]
+        result[i,2] <- res[2]
+      }
+      id <- which.max(result[, 1])
+      res <- result[id,]
+    }
+    
+    
+  }else{
+    if (is.null(dat_x)) {
+      num_y <- ncol(dat_y)
+      result <- matrix(nrow = num_y,ncol=2)
+      for (i in 1:num_y) {
+        res <- basic_function(x, dat_y[,i], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+        result[i,1] <- res[1]
+        result[i,2] <- res[2]
+      }
+      id <- which.max(result[, 1])
+      res <- result[id,]
+    }else{
+      num_x <- ncol(dat_x)
+      num_y <- ncol(dat_y)
+      result <- matrix(nrow = num_x*num_y,ncol=2)
+      for (i in 1:num_x) {
+        for (j in 1:num_y) {
+          res <- basic_function(dat_x[,i], dat_y[,j], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+          result[(i-1)*num_y+j,1] <- res[1]
+          result[(i-1)*num_y+j,2] <- res[2]
+        }
+      }
+      id <- which.max(result[, 1])
+      res <- result[id,]
+    }
+    
+  }
+  # estimate <- res[1]
+  # sd_estimate <- res[2]
+  # S <- (estimate - 0) / sd_estimate
+  # 
+  # # Calculate two-sided p-value
+  # p_value_two_sided <- 2 * pnorm(-abs(S))
+  # 
+  # # Output
+  # return(list(p_value = p_value_two_sided, alpha = alpha, independent = p_value_two_sided > alpha))
+  return(res)
+  
+}
+ORtest <- function(x,y,S,suffStat) {
+  
+  # Extract the positions of X, Y, and Z from the location vector
+  x_pos <- x
+  y_pos <- y
+  z_pos <- S
+  
+  # Ensure that X and Y positions are different
+  if (x_pos == y_pos) {
+    stop("X and Y should be at different positions.")
+  }
+  dat <- suffStat$dat
+  sl <- suffStat$sl
+  cross_fitting <- suffStat$cross_fitting
+  kfolds <- suffStat$kfolds
+  
+  
+  ### p value 1
+  # Extract X, Y, and Z variables from the dataframe
+  X <- dat[, x_pos]
+  Y <- dat[, y_pos]
+  Z <- dat[, z_pos]
+  res1 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  ### p value 2
+  # Extract X, Y, and Z variables from the dataframe
+  Y <- dat[, x_pos]
+  X <- dat[, y_pos]
+  Z <- dat[, z_pos]
+  res2 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  # Return the X, Y, and Z variables in a list
+  return(list(res1,res2))
+}
+
+ORtest_single <- function(x,y,S,suffStat) {
+  
+  # Extract the positions of x, y, and S from the location vector
+  x_pos <- x
+  y_pos <- y
+  s_pos <- S
+  
+  # Ensure that x and y positions are different
+  if (x_pos == y_pos) {
+    stop("x and y should be at different positions.")
+  }
+  dat <- suffStat$dat
+  sl <- suffStat$sl
+  cross_fitting <- suffStat$cross_fitting
+  kfolds <- suffStat$kfolds
+  
+  
+  ### p value 1
+  # Extract x, y, and S variables from the dataframe
+  x <- dat[, x_pos]
+  y <- dat[, y_pos]
+  S <- dat[, s_pos]
+  res1 <- multi_level(x = x,y= y,S=S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  
+  
+  
+  # Two-sided p-value
+  estimate <- res1[1]
+  sd_estimate <- res1[2]
+  z <- (estimate - 0) / sd_estimate
+  
+  # Calculate two-sided p-value
+  p_value_two_sided <- 2 * pnorm(-abs(z))
+  return(p_value_two_sided)
+}
+```
+
 
 In this vignette, we will introduce the main functions provided in  __`ortest`__ package, including `psi.hat_linear()`, `psi.hat_sl_2in1()`, `basic_function()`,`multi_level()` and `OR_test()`.
 
@@ -40,13 +991,13 @@ In our package, we have two types of basic odds ratio estimation functions. The 
 
 For these two psi.hat estimation method, the user needs to indicate whether the variable is binary or numeric. The following are some examples. The estimation and standard error of odds ratio will be returned.
 
-```{r}
+```{r echo=FALSE}
 n <- 1000
 ```
 
-This is the example of continuos outcome and binary exposure.
+**This is the example of continuos outcome and binary exposure.**
 
-```{r}
+```{r eval=FALSE}
 L1 <- runif(n,0,1)
 L2 <- runif(n,0,1)
 L3 <- runif(n,0,1)
@@ -77,9 +1028,9 @@ psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, e
 
 ```
 
-This is the example of continuous outcome and continuous exposure.
+**This is the example of continuous outcome and continuous exposure.**
 
-```{r}
+```{r eval=FALSE}
 L1 <- runif(n,0,1)
 L2 <- runif(n,0,1)
 L3 <- runif(n,0,1)
@@ -101,14 +1052,14 @@ dat <- tibble(
   A = A.true
 ) %>% cbind(L_vec)
 
-l1 <- psi.hat_linear(Y = dat$Y,A = dat$A,L = c(), subset = NULL, out.bin = FALSE, exp.bin = FALSE, exp.scalar = TRUE)
-l2 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, exp.scalar = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
-l3 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, exp.scalar = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
+l1 <- psi.hat_linear(y = dat$Y,x = dat$A,S = c(), subset = NULL, out.bin = FALSE, exp.bin = FALSE)
+l2 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, sl=NULL,cross_fitting = FALSE,kfolds=5)
+l3 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, sl=NULL,cross_fitting = TRUE,kfolds=5)
 ```
 
-This is the example of binary outcome and binary exposure.
+**This is the example of binary outcome and binary exposure.**
 
-```{r}
+```{r eval=FALSE}
   L1 <- runif(n,0,1)
   L2 <- runif(n,0,1)
   L3 <- runif(n,0,1)
@@ -131,21 +1082,24 @@ This is the example of binary outcome and binary exposure.
     A = A.true
   ) %>% cbind(L_vec)
 
-l1 <- psi.hat_linear(Y = dat$Y,A = dat$A,L = c(), subset = NULL, out.bin = TRUE, exp.bin = TRUE, exp.scalar = TRUE)
-l2 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE, exp.scalar = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
-l3 <- psi.hat_sl_2in1(Y = dat$Y,A = dat$A,L = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE, exp.scalar = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
+l1 <- psi.hat_linear(y = dat$Y,x = dat$A,S = c(), subset = NULL, out.bin = TRUE, exp.bin = TRUE)
+l2 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
+l3 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
 ```
 
 
 
 ## OR_test
 
-`OR_test()` detect whether the variable is binary or numeric. Thus the user only needs to input the x,y and S. It can also be used for multi-level factor. For variables in S is more than 4, the super learner is used or the linear method is applied. Super learner models can be assigned in `suffStat` or user can use the default models. Cross fitting is only allowed in super learner or the error would be reported. The detail of Super learner is set in `suffStat`.
+`ORtest()` detect whether the variable is binary or numeric. Thus the user only needs to input the x,y and S. It can also be used for multi-level factor. For variables in S is more than 4, the super learner is used or the linear method is applied. Super learner models can be assigned in `suffStat` or user can use the default models. Cross fitting is only allowed in super learner or the error would be reported. The detail of Super learner is set in `suffStat`.
 
-Moreover, `OR_test()` also detect multi-level factor. The factor which the levels are more than two and less than five will be considered as multi-level factor. Multi-level factor will be converted dummy variable and multi model will be fit. The largest estimation of odds ratio and its standard error will be returned.
+Moreover, `ORtest()` also detect multi-level factor. The factor which the levels are more than two and less than five will be considered as multi-level factor. Multi-level factor will be converted dummy variable and multi model will be fit. The p-value based on largest estimation of odds ratio will be used.
 
-```{r}
+`ORtest()` will return the p-value for both $y \sim x+S$ and $x \sim y+S$.
+
+```{r eval=FALSE}
 ## c to m
+load("chaoqi_data.RData")
 ORtest(1,5,c(2:4,6:10),list(dat = data, sl=NULL,cross_fitting=FALSE,kfolds=5))
 ORtest(1,5,c(2:4,6:10),list(dat = data, sl=NULL,cross_fitting=TRUE,kfolds=5))
 
@@ -159,29 +1113,16 @@ ORtest(5,6,c(1:4,7:10),list(dat = data, sl=NULL,cross_fitting=TRUE,kfolds=5))
 
 ```
 
-The `OR_test` can be passed to pc algorithm for independence test.
+The `ORtest_single` is the simliar function which only returned $y \sim x+S$. Thus it can be passed to pc algorithm for independence test.
 
-```{r}
+
+
+
+```{r,message=FALSE,warning=FALSE,error=FALSE}
+load("chaoqi_data.RData")
 V <- colnames(data)
-
-# suffStat = list(dat = data,sl=NULL,cross_fitting=FALSE,kfolds=5)
-# indepTest=ORtest_single
-# alpha=0.01
-# labels=V
-# skel.method = "stable"
-# fixedGaps=NULL
-# fixedEdges=NULL
-# NAdelete=TRUE
-# m.max=Inf
-# numCores=1
-# verbose=TRUE
-# skeleton(suffStat, indepTest, alpha, labels = labels,
-#     method = skel.method, fixedGaps = fixedGaps, fixedEdges = fixedEdges,
-#     NAdelete = NAdelete, m.max = m.max, numCores = numCores,
-#     verbose = verbose)
-
 pc.fit <- pc(suffStat = list(dat = data,sl=NULL,cross_fitting=FALSE,kfolds=5),
              indepTest = ORtest_single, ## indep.test: partial correlations
-             alpha=0.01, labels = V, verbose = TRUE)
+             alpha=0.01, labels = V, verbose = FALSE)
 plot(pc.fit)
 ```
