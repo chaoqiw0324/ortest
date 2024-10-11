@@ -55,8 +55,8 @@ Then you can attach the package `ortest`:
 
 ## Get started
 
-For an overview of the main features of `ortest`, please read the [Get
-started](https://chaoqiw0324.github.io/ortest/articles/ortest.html)
+For an overview of the main features of `ortest`, please read the [Using the Ortest package
+](https://chaoqiw0324.github.io/ortest/docs/articles/ortest.html)
 vignette.
 
 
@@ -65,7 +65,7 @@ vignette.
 
 Please cite `ortest` as:
 
-> Wu Chaoqi (2024) ortest: An R package to **{{ TITLE }}**. R package
+> Wu Chaoqi (2024) ortest: An R package to ortest. R package
 > version 0.0.0.9000. <https://github.com/chaoqiw0324/ortest/>
 
 ## Contributing
