@@ -53,7 +53,7 @@ Then you can attach the package `ortest`:
 ## Get started
 
 For an overview of the main features of `ortest`, please read the [Using the Ortest package
-](https://chaoqiw0324.github.io/ortest/articles/index.html)
+](https://chaoqiw0324.github.io/ortest/articles/ortest.html)
 vignette.
 
 
