@@ -21,11 +21,8 @@ coverage](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.
 <a href="#features">Features</a><br> •
 <a href="#installation">Installation</a><br> •
 <a href="#get-started">Get started</a><br> •
-<a href="#long-form-documentations">Long-form documentations</a><br> •
 <a href="#citation">Citation</a><br> •
 <a href="#contributing">Contributing</a><br> •
-<a href="#acknowledgments">Acknowledgments</a><br> •
-<a href="#references">References</a>
 </p>
 
 ## Overview
