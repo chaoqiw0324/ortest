@@ -17,12 +17,12 @@ coverage](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.
 <!-- badges: end -->
 
 <p align="left">
-• <a href="#overview">Overview</a><br> •
-<a href="#features">Features</a><br> •
-<a href="#installation">Installation</a><br> •
-<a href="#get-started">Get started</a><br> •
-<a href="#citation">Citation</a><br> •
-<a href="#contributing">Contributing</a><br> •
+• <a href="#overview">Overview</a><br> 
+• <a href="#features">Features</a><br> 
+• <a href="#installation">Installation</a><br> 
+• <a href="#get-started">Get started</a><br> 
+• <a href="#citation">Citation</a><br> 
+• <a href="#contributing">Contributing</a><br> 
 </p>
 
 ## Overview
