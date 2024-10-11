@@ -63,7 +63,7 @@ We test whether <code>x</code> and <code>y</code> are conditionally associated, 
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre><code>ORtest(x, y, S, suffStat = list(dat, sl,cross_fitting,kfolds)</code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ORtest</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">S</span>, <span class="va">suffStat</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -88,13 +88,13 @@ We test whether <code>x</code> and <code>y</code> are conditionally associated, 
     <h2>Value</h2>
     
 
-<p>p-value for model <code>y  x + S</code> and <code>x  y+S</code>.</p>
+<p>p-value for model <code>y ~ x + S</code> and <code>x ~ y+S</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
     <p>This function test whether <code>x</code> and <code>y</code> is independent conditional on
-<code>S</code>. The final results includes p-value for model <code>y  x + S</code>
-and <code>x  y+S</code>.</p>
+<code>S</code>. The final results includes p-value for model <code>y ~ x + S</code>
+and <code>x ~ y+S</code>.</p>
     </div>
 
   </div>
