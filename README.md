@@ -56,7 +56,7 @@ Then you can attach the package `ortest`:
 ## Get started
 
 For an overview of the main features of `ortest`, please read the [Using the Ortest package
-](https://github.com/chaoqiw0324/ortest/blob/master/docs/articles/ortest.html)
+](https://chaoqiw0324.github.io/ortest/docs/articles/index.html)
 vignette.
 
 
