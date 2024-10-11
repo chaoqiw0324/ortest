@@ -45,18 +45,6 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/get_started.html">get_started</a>
-    </li>
-  </ul>
-</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -92,7 +80,7 @@ Daniel Malinsky</h4>
     
 <p>In this vignette, we will introduce the main functions provided in
 <strong><code>ortest</code></strong> package, including
-<code><a href="../reference/psi.hat_linear.html">psi.hat_linear()</a></code>, <code>psi.hat_sl_2in1()</code>,
+<code><a href="../reference/psi.hat_linear.html">psi.hat_linear()</a></code>, <code><a href="../reference/psi.hat_sl.html">psi.hat_sl()</a></code>,
 <code>basic_function()</code>,<code>multi_level()</code> and
 <code>OR_test()</code>.</p>
 <div class="section level2">
@@ -100,11 +88,10 @@ Daniel Malinsky</h4>
 </h2>
 <p>In our package, we have two types of basic odds ratio estimation
 functions. The first one is <code><a href="../reference/psi.hat_linear.html">psi.hat_linear()</a></code>, using linear
-model for estimation. The second one is <code>psi.hat_sl_2in1()</code>,
-using super learner method for estimation. The users can assign the
-model used in super learner and the default models has already been
-assigned. Cross-fitting is also allowed for
-<code>psi.hat_sl_2in1()</code>.</p>
+model for estimation. The second one is <code><a href="../reference/psi.hat_sl.html">psi.hat_sl()</a></code>, using
+super learner method for estimation. The users can assign the model used
+in super learner and the default models has already been assigned.
+Cross-fitting is also allowed for <code><a href="../reference/psi.hat_sl.html">psi.hat_sl()</a></code>.</p>
 <p>For these two psi.hat estimation method, the user needs to indicate
 whether the variable is binary or numeric. The following are some
 examples. The estimation and standard error of odds ratio will be
@@ -135,8 +122,8 @@ exposure.</strong></p>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="sc">+</span>   <span class="at">A =</span> A.true</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="sc">+</span> ) <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(L_vec)</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">psi.hat_linear</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> <span class="fu">c</span>(), <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">psi.hat_sl_2in1</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">psi.hat_sl_2in1</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>,<span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">TRUE</span>, <span class="at">kfolds=</span><span class="dv">5</span>)</span></code></pre></div>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">psi.hat_sl</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">psi.hat_sl</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>,<span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">TRUE</span>, <span class="at">kfolds=</span><span class="dv">5</span>)</span></code></pre></div>
 <p><strong>This is the example of continuous outcome and continuous
 exposure.</strong></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> L1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n,<span class="dv">0</span>,<span class="dv">1</span>)</span>
@@ -161,8 +148,8 @@ exposure.</strong></p>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="sc">+</span> ) <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(L_vec)</span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> </span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span> l1 <span class="ot">&lt;-</span> <span class="fu">psi.hat_linear</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> <span class="fu">c</span>(), <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l2 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl_2in1</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">FALSE</span>, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l3 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl_2in1</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">FALSE</span>, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">TRUE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span></code></pre></div>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l2 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">FALSE</span>, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l3 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">FALSE</span>, <span class="at">exp.bin =</span> <span class="cn">FALSE</span>, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">TRUE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span></code></pre></div>
 <p><strong>This is the example of binary outcome and binary
 exposure.</strong></p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>   L1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n,<span class="dv">0</span>,<span class="dv">1</span>)</span>
@@ -188,13 +175,13 @@ exposure.</strong></p>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="sc">+</span>   ) <span class="sc">%&gt;%</span> <span class="fu">cbind</span>(L_vec)</span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> </span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span> l1 <span class="ot">&lt;-</span> <span class="fu">psi.hat_linear</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> <span class="fu">c</span>(), <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">TRUE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l2 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl_2in1</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">TRUE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>,<span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l3 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl_2in1</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">TRUE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>,<span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">TRUE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span></code></pre></div>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l2 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">TRUE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>,<span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> l3 <span class="ot">&lt;-</span> <span class="fu">psi.hat_sl</span>(<span class="at">y =</span> dat<span class="sc">$</span>Y,<span class="at">x =</span> dat<span class="sc">$</span>A,<span class="at">S =</span> L_vec, <span class="at">subset =</span> <span class="cn">NULL</span>, <span class="at">out.bin =</span> <span class="cn">TRUE</span>, <span class="at">exp.bin =</span> <span class="cn">TRUE</span>,<span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting =</span> <span class="cn">TRUE</span>,<span class="at">kfolds=</span><span class="dv">5</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="or_test">OR_test<a class="anchor" aria-label="anchor" href="#or_test"></a>
 </h2>
-<p><code>ORtest()</code> detect whether the variable is binary or
+<p><code><a href="../reference/ORtest.html">ORtest()</a></code> detect whether the variable is binary or
 numeric. Thus the user only needs to input the x,y and S. It can also be
 used for multi-level factor. For variables in S is more than 4, the
 super learner is used or the linear method is applied. Super learner
@@ -202,12 +189,12 @@ models can be assigned in <code>suffStat</code> or user can use the
 default models. Cross fitting is only allowed in super learner or the
 error would be reported. The detail of Super learner is set in
 <code>suffStat</code>.</p>
-<p>Moreover, <code>ORtest()</code> also detect multi-level factor. The
+<p>Moreover, <code><a href="../reference/ORtest.html">ORtest()</a></code> also detect multi-level factor. The
 factor which the levels are more than two and less than five will be
 considered as multi-level factor. Multi-level factor will be converted
 dummy variable and multi model will be fit. The p-value based on largest
 estimation of odds ratio will be used.</p>
-<p><code>ORtest()</code> will return the p-value for both <span class="math inline">\(y \sim x+S\)</span> and <span class="math inline">\(x \sim y+S\)</span>.</p>
+<p><code><a href="../reference/ORtest.html">ORtest()</a></code> will return the p-value for both <span class="math inline">\(y \sim x+S\)</span> and <span class="math inline">\(x \sim y+S\)</span>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="do">## c to m</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span> <span class="fu">load</span>(<span class="st">"chaoqi_data.RData"</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">ORtest</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">10</span>),<span class="fu">list</span>(<span class="at">dat =</span> data, <span class="at">sl=</span><span class="cn">NULL</span>,<span class="at">cross_fitting=</span><span class="cn">FALSE</span>,<span class="at">kfolds=</span><span class="dv">5</span>))</span>

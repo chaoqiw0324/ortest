@@ -4,6 +4,7 @@
 #' @import SuperLearner 
 #' @import stats
 #' @import pcalg
+#' @importFrom gt %>% 
 "_PACKAGE"
 
 # Imports: starts,

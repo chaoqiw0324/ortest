@@ -2,7 +2,8 @@
 #' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
-#' @usage psi.hat_linear(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"))
+#' @usage 
+#' psi.hat_linear(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"))
 #' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
@@ -20,8 +21,6 @@
 #' This model is tested whether \code{x} and \code{y} is independent conditional on
 #' \code{S}. The final result is the test statistics and standard error.
 #' 
-#' @import BB
-#' @import lubridate
 #' @return Test statistics and standard error of the test. 
 #' 
 #' @export
@@ -193,7 +192,8 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
 #'
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
-#' @usage psi.hat_sl(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"),sl=NULL,cross_fitting = FALSE,kfolds=5)
+#' @usage 
+#' psi.hat_sl(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"),sl=NULL,cross_fitting = FALSE,kfolds=5)
 #' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
@@ -213,9 +213,6 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
 #' and XGBoost.
 #' This model is tested whether \code{x} and \code{y} is independent conditional on
 #' \code{S}. The final result is the test statistics and standard error.
-#' @import BB
-#' @import lubridate
-#' @import SuperLearner
 #' @return Test statistics and standard error of the test. 
 #' 
 #' @export

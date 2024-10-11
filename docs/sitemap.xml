@@ -28,6 +28,9 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/reference/ORtest.html</loc>
+  </url>
+  <url>
     <loc>/reference/ORtest_single.html</loc>
   </url>
   <url>
@@ -41,5 +44,8 @@
   </url>
   <url>
     <loc>/reference/psi.hat_linear.html</loc>
+  </url>
+  <url>
+    <loc>/reference/psi.hat_sl.html</loc>
   </url>
 </urlset>
