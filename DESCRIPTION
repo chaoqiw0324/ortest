@@ -19,3 +19,9 @@ VignetteBuilder: knitr
 Suggests: 
     knitr,
     rmarkdown
+Imports: 
+    BB,
+    lubridate,
+    pcalg,
+    stats,
+    SuperLearner

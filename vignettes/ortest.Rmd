@@ -1,23 +1,13 @@
 ---
 title: "Using the Ortest package"
-author: Chaoqi Wu and Daniel Malinsky
-date: "`r Sys.Date()`"
+author: "Chaoqi Wu and Daniel Malinsky"
 output:
-  rmarkdown::html_document:
-    toc: true
-    toc_depth: 2
-    toc_float: true
-vignette: >
-  %\VignetteIndexEntry{Using the SSIndex package}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}{inputenc}
+  rmarkdown::html_document: default
+  rmarkdown::html_vignette: default
+vignette: "%\\VignetteIndexEntry{Using the Ortest package} %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}{inputenc}\n"
 ---
 
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-</script>
 
 ```{r default, include = FALSE}
 knitr::opts_chunk$set(prompt = TRUE, comment = "")
@@ -113,7 +103,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
       }
     }, error = function(e) {
       # If an error occurs, set res to zero
-      cat("Error encountered: ", conditionMessage(e), "\n")
+      # cat("Error encountered: ", conditionMessage(e), "\n")
       0
     })
     
@@ -200,7 +190,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
   
 }
 
-psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
+psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
   ## Function: estimate the odds ratio parameter psi
   ## Input: 1. An outcome nuisance model, onm = f(y|S,x=0)
   ##        2. An exposure nuisance model, enm = g(x|y=0,S)
@@ -313,7 +303,7 @@ psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin 
         }
       }, error = function(e) {
         # If an error occurs, set res to zero
-        cat("Error encountered: ", conditionMessage(e), "\n")
+        # cat("Error encountered: ", conditionMessage(e), "\n")
         0
       })      
       
@@ -424,7 +414,7 @@ psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin 
       }
     }, error = function(e) {
       # If an error occurs, set res to zero
-      cat("Error encountered: ", conditionMessage(e), "\n")
+      # cat("Error encountered: ", conditionMessage(e), "\n")
       0
     })    
     # Baking the bread (approximate derivative)
@@ -538,7 +528,7 @@ psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin 
           }
         }, error = function(e) {
           # If an error occurs, set res to zero
-          cat("Error encountered: ", conditionMessage(e), "\n")
+          # cat("Error encountered: ", conditionMessage(e), "\n")
           0
         })
         
@@ -685,7 +675,7 @@ psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin 
         }
       }, error = function(e) {
         # If an error occurs, set res to zero
-        cat("Error encountered: ", conditionMessage(e), "\n")
+        # cat("Error encountered: ", conditionMessage(e), "\n")
         0
       })
       
@@ -790,7 +780,7 @@ basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
   roots="uni"
   
   if(is_big_S){
-    res <- psi.hat_sl_2in1(y=y,x=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+    res <- psi.hat_sl(y=y,x=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
   }else{
     if (!cross_fitting) {
       res <- psi.hat_linear(y=y,x=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,root=roots)
@@ -983,11 +973,11 @@ ORtest_single <- function(x,y,S,suffStat) {
 ```
 
 
-In this vignette, we will introduce the main functions provided in  __`ortest`__ package, including `psi.hat_linear()`, `psi.hat_sl_2in1()`, `basic_function()`,`multi_level()` and `OR_test()`.
+In this vignette, we will introduce the main functions provided in  __`ortest`__ package, including `psi.hat_linear()`, `psi.hat_sl()`, `basic_function()`,`multi_level()` and `OR_test()`.
 
 ## psi.hat
 
-In our package, we have two types of basic odds ratio estimation functions. The first one is `psi.hat_linear()`, using linear model for estimation. The second one is `psi.hat_sl_2in1()`, using super learner method for estimation. The users can assign the model used in super learner and the default models has already been assigned. Cross-fitting is also allowed for `psi.hat_sl_2in1()`.
+In our package, we have two types of basic odds ratio estimation functions. The first one is `psi.hat_linear()`, using linear model for estimation. The second one is `psi.hat_sl()`, using super learner method for estimation. The users can assign the model used in super learner and the default models has already been assigned. Cross-fitting is also allowed for `psi.hat_sl()`.
 
 For these two psi.hat estimation method, the user needs to indicate whether the variable is binary or numeric. The following are some examples. The estimation and standard error of odds ratio will be returned.
 
@@ -1022,8 +1012,8 @@ dat <- tibble(
   A = A.true
 ) %>% cbind(L_vec)
 psi.hat_linear(y = dat$Y,x = dat$A,S = c(), subset = NULL, out.bin = FALSE, exp.bin = TRUE)
-psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = TRUE, sl=NULL,cross_fitting = FALSE,kfolds=5)
-psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = TRUE,sl=NULL,cross_fitting = TRUE, kfolds=5)
+psi.hat_sl(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = TRUE, sl=NULL,cross_fitting = FALSE,kfolds=5)
+psi.hat_sl(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = TRUE,sl=NULL,cross_fitting = TRUE, kfolds=5)
 
 
 ```
@@ -1053,8 +1043,8 @@ dat <- tibble(
 ) %>% cbind(L_vec)
 
 l1 <- psi.hat_linear(y = dat$Y,x = dat$A,S = c(), subset = NULL, out.bin = FALSE, exp.bin = FALSE)
-l2 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, sl=NULL,cross_fitting = FALSE,kfolds=5)
-l3 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, sl=NULL,cross_fitting = TRUE,kfolds=5)
+l2 <- psi.hat_sl(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, sl=NULL,cross_fitting = FALSE,kfolds=5)
+l3 <- psi.hat_sl(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FALSE, exp.bin = FALSE, sl=NULL,cross_fitting = TRUE,kfolds=5)
 ```
 
 **This is the example of binary outcome and binary exposure.**
@@ -1083,8 +1073,8 @@ l3 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = FA
   ) %>% cbind(L_vec)
 
 l1 <- psi.hat_linear(y = dat$Y,x = dat$A,S = c(), subset = NULL, out.bin = TRUE, exp.bin = TRUE)
-l2 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
-l3 <- psi.hat_sl_2in1(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
+l2 <- psi.hat_sl(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE,sl=NULL,cross_fitting = FALSE,kfolds=5)
+l3 <- psi.hat_sl(y = dat$Y,x = dat$A,S = L_vec, subset = NULL, out.bin = TRUE, exp.bin = TRUE,sl=NULL,cross_fitting = TRUE,kfolds=5)
 ```
 
 

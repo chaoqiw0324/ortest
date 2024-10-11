@@ -6,7 +6,7 @@
 \alias{ortest-package}
 \title{ortest: The Title of the Project}
 \description{
-A paragraph providing a full description of the project (on several lines...)
+Function for conditional independence test
 }
 \seealso{
 Useful links:

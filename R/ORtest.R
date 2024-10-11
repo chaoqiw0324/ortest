@@ -1,3 +1,8 @@
+all_numeric <- function(df) {
+  all_numeric <- all(sapply(df, is.numeric))
+  return(all_numeric)
+}
+
 basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
   # Check if x and y are binary or continuous
   if(! is.numeric(x) | ! is.numeric(y)){
@@ -66,7 +71,7 @@ basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
   roots="uni"
   
   if(is_big_S){
-    res <- psi.hat_sl_2in1(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+    res <- psi.hat_sl(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
   }else{
     if (!cross_fitting) {
       res <- psi.hat_linear(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots)
@@ -188,6 +193,23 @@ multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
   return(res)
   
 }
+
+#' Conditional Independence Test
+#' We test whether \code{x} and \code{y} are conditionally associated, given
+#' \code{S} 
+#' @usage ORtest(x, y, S, suffStat = list(dat, sl,cross_fitting,kfolds)
+#' 
+#' @param x The position of the exposure variable 
+#' @param y The position of the exposure variable 
+#' @param S The position of the conditional variable set
+#' @param suffStat A list with four elements, "dat" is the dat matrix ,"sl" specifies the super learning model,"cross_fitting" indicates whether super learning is used and "kfolds" decides the folds for cross-fitting.
+#'
+#' @details This function test whether \code{x} and \code{y} is independent conditional on
+#' \code{S}. The final results includes p-value for model \code{y \sim x + S} 
+#' and \code{x \sim y+S}.
+#' @return p-value for model \code{y \sim x + S} and \code{x \sim y+S}.
+#' @export
+#'
 ORtest <- function(x,y,S,suffStat) {
   
   # Extract the positions of X, Y, and Z from the location vector
@@ -221,6 +243,22 @@ ORtest <- function(x,y,S,suffStat) {
   return(list(res1,res2))
 }
 
+#' Conditional Independence Test
+#' We test whether \code{x} and \code{y} are conditionally associated, given
+#' \code{S} 
+#' @usage ORtest_single(x, y, S, suffStat = list(dat, sl,cross_fitting,kfolds)
+#' 
+#' @param x The position of the exposure variable 
+#' @param y The position of the exposure variable 
+#' @param S The position of the conditional variable set
+#' @param suffStat A list with four elements, "dat" is the dat matrix ,"sl" specifies the super learning model,"cross_fitting" indicates whether super learning is used and "kfolds" decides the folds for cross-fitting.
+#'
+#' @details This function test whether \code{x} and \code{y} is independent conditional on
+#' \code{S}. The final result only includes p value for model \code{y \sim x + S}. 
+#' 
+#' @return p-value for model \code{y \sim x + S}.
+#' @export
+#'
 ORtest_single <- function(x,y,S,suffStat) {
   
   # Extract the positions of x, y, and S from the location vector

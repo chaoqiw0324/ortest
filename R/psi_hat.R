@@ -1,28 +1,32 @@
-#' Regression or Super-Learning Based Conditional Independence Test
+#' Regression Based Conditional Independence Test
 #' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
-#' \code{S} using a generalized linear model/ super learning method. 
+#' \code{S} using a generalized linear model. 
+#' @usage psi.hat_linear(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"))
 #' 
+#' @param y Outcome variable, either binary or numeric
+#' @param x Exposure variable, either binary or numeric
+#' @param S Conditional variable set, can be empty
+#' @param subset Optionally, control the subset of the dataset to be used
+#' @param out.bin A logical evaluating to TRUE or FALSE indicating whether outcome variable is binary.
+#' @param exp.bin A logical evaluating to TRUE or FALSE indicating whether exposure variable is binary.
+#' @param root String specifying the method of solving equations 
+#'
 #' @details All included variables should be either numeric or binary. If 
-#' \code{S} includes less than 4 variables, regression model is fitted. If
+#' \code{S} includes less than 4 variables, regression model is recommended. If
 #' \code{y} is numeric, a linear regression model is fitted. If \code{y} is 
-#' binary, a linear regression model is fitted. \code{x} and \code{S} are 
-#' included as explanatory variables. If \code{S} includes more than 4 variables,
-#' super learning method is applied. If \code{y} is numeric, the default method 
-#' is linear regression model, mean response,MARS, random forest and XGBoost. If 
-#' \code{y} is binary, the default method is LDA, mean response,MARS, random forest 
-#' and XGBoost.
+#' binary, a logistical regression model is fitted. \code{x} and \code{S} are 
+#' included as explanatory variables. 
 #' This model is tested whether \code{x} and \code{y} is independent conditional on
 #' \code{S}. The final result is the test statistics and standard error.
-#'
-#' @return Two numeric, which are the test statistics and standard error of the test. 
+#' 
+#' @import BB
+#' @import lubridate
+#' @return Test statistics and standard error of the test. 
 #' 
 #' @export
 
-all_numeric <- function(df) {
-  all_numeric <- all(sapply(df, is.numeric))
-  return(all_numeric)
-}
+
 
 psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = "uni"){
   ## Function: estimate the odds ratio parameter psi
@@ -185,7 +189,38 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
   
 }
 
-psi.hat_sl_2in1 <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
+#' Super-Learning Based Conditional Independence Test
+#'
+#' We test whether \code{x} and \code{y} are conditionally associated, given
+#' \code{S} using a generalized linear model. 
+#' @usage psi.hat_sl(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"),sl=NULL,cross_fitting = FALSE,kfolds=5)
+#' 
+#' @param y Outcome variable, either binary or numeric
+#' @param x Exposure variable, either binary or numeric
+#' @param S Conditional variable set, can be empty
+#' @param subset Optionally, control the subset of the dataset to be used
+#' @param out.bin A logical evaluating to TRUE or FALSE indicating whether outcome variable is binary.
+#' @param exp.bin A logical evaluating to TRUE or FALSE indicating whether exposure variable is binary.
+#' @param root String specifying the method of solving equations 
+#' @param sl Character string specifying models applied in super learning
+#' @param cross_fitting A logical evaluating to TRUE or FALSE indicating whether cross-fitting is used.
+#' @param kfolds A numeric indicating how many folds is used for cross-fitting if applied
+#'
+#' @details All included variables should be either numeric or binary. If \code{S} includes more than 4 variables,
+#' super learning method is recommended. If \code{y} is numeric, the default method 
+#' is linear regression model, mean response,MARS, random forest and XGBoost. If 
+#' \code{y} is binary, the default method is LDA, mean response,MARS, random forest 
+#' and XGBoost.
+#' This model is tested whether \code{x} and \code{y} is independent conditional on
+#' \code{S}. The final result is the test statistics and standard error.
+#' @import BB
+#' @import lubridate
+#' @import SuperLearner
+#' @return Test statistics and standard error of the test. 
+#' 
+#' @export
+#' 
+psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
   ## Function: estimate the odds ratio parameter psi
   ## Input: 1. An outcome nuisance model, onm = f(y|S,x=0)
   ##        2. An exposure nuisance model, enm = g(x|y=0,S)
