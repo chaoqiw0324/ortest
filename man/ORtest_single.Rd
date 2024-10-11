@@ -6,7 +6,7 @@
 We test whether \code{x} and \code{y} are conditionally associated, given
 \code{S}}
 \usage{
-ORtest_single(x, y, S, suffStat = list(dat, sl,cross_fitting,kfolds)
+ORtest_single(x, y, S, suffStat)
 }
 \arguments{
 \item{x}{The position of the exposure variable}
@@ -18,7 +18,7 @@ ORtest_single(x, y, S, suffStat = list(dat, sl,cross_fitting,kfolds)
 \item{suffStat}{A list with four elements, "dat" is the dat matrix ,"sl" specifies the super learning model,"cross_fitting" indicates whether super learning is used and "kfolds" decides the folds for cross-fitting.}
 }
 \value{
-p-value for model \code{y \sim x + S}.
+p-value for model \code{y ~ x + S}.
 }
 \description{
 Conditional Independence Test
@@ -27,5 +27,5 @@ We test whether \code{x} and \code{y} are conditionally associated, given
 }
 \details{
 This function test whether \code{x} and \code{y} is independent conditional on
-\code{S}. The final result only includes p value for model \code{y \sim x + S}.
+\code{S}. The final result only includes p value for model \code{y ~ x + S}.
 }

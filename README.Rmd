@@ -44,14 +44,11 @@ ortest <img src="man/figures/package-sticker.png" align="right" style="float:rig
 
 ## Overview
 
-
-The R package `ortest`... **{{ DESCRIBE YOUR PACKAGE }}**
-
-
+The R package `ortest` provides an odds ratio based conditional independence test for mixed data types, using nonparametric methods for nuisance estimation, including random forests, XGboost, and SuperLearner
 
 ## Features
 
-The main purpose of `ortest` is to... **{{ DESCRIBE THE MAIN FEATURES }}**
+The main purpose of `ortest` is to test conditional independence test for mixed data types including numeric, binary and multi-level factor, and to implemented in pc algorithm. 
 
 
 
@@ -79,49 +76,28 @@ library("ortest")
 
 ## Get started
 
-For an overview of the main features of `ortest`, please read the 
-[Get started](https://chaoqiw0324.github.io/ortest/articles/ortest.html)
+For an overview of the main features of `ortest`, please read the [Using the Ortest package
+](https://chaoqiw0324.github.io/ortest/docs/articles/ortest.html)
 vignette.
-
-
-
-## Long-form documentations
-
-`ortest` provides **{{ NUMBER OF VIGNETTES }}** vignettes to learn more about the package:
-
-- the [Get started](https://chaoqiw0324.github.io/ortest/articles/ortest.html)
-vignette describes the core features of the package
-- **{{ LIST ADDITIONAL VIGNETTES }}**
 
 
 
 ## Citation
 
-Please cite `ortest` as: 
+Please cite `ortest` as:
 
-> Wu Chaoqi (`r format(Sys.Date(), "%Y")`) ortest: An R 
-package to **{{ TITLE }}**. R package version 0.0.0.9000. 
-<https://github.com/chaoqiw0324/ortest/>
-
-
+> Wu Chaoqi (2024) ortest: An R package to ortest. R package
+> version 0.0.0.9000. <https://github.com/chaoqiw0324/ortest/>
 
 ## Contributing
 
-All types of contributions are encouraged and valued. For more information, 
-check out our [Contributor Guidelines](https://github.com/chaoqiw0324/ortest/blob/main/CONTRIBUTING.md).
+All types of contributions are encouraged and valued. For more
+information, check out our [Contributor
+Guidelines](https://github.com/chaoqiw0324/ortest/blob/main/CONTRIBUTING.md).
 
-Please note that the `ortest` project is released with a 
-[Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). 
+Please note that the `ortest` project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
 
 
-
-## Acknowledgments
-
-**{{ OPTIONAL SECTION }}**
-
-
-
-## References
-
-**{{ OPTIONAL SECTION }}**
