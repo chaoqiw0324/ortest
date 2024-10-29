@@ -9,3 +9,7 @@
 ^README\.html$
 ^_pkgdown\.yaml$
 ^CITATION\.cff$
+^docs$
+^or_test\.Rproj$
+^_pkgdown\.yml$
+^pkgdown$

@@ -8,7 +8,7 @@ Authors@R: c(
            role    = c("aut", "cre", "cph"),
            email   = "cw3370@cumc.columbia.edu",
            comment = c(ORCID = "{{orcid}}")))
-Description: Function for conditional independence test
+Description: Function for conditional independence test, using different method for mixed data type.
 URL: https://github.com/chaoqiw0324/ortest
 BugReports: https://github.com/chaoqiw0324/ortest/issues
 License: GPL (>= 2)
@@ -18,10 +18,19 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Suggests: 
     knitr,
+    testthat(>= 3.0.0),
     rmarkdown
 Imports: 
+    numDeriv,
+    rootSolve,
     BB,
+    utils,
+    caret,
+    tibble,
     lubridate,
     pcalg,
     stats,
     SuperLearner
+Depends: 
+    R (>= 3.5.0),
+    tidyverse

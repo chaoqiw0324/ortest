@@ -3,13 +3,19 @@ all_numeric <- function(df) {
   return(all_numeric)
 }
 
-basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
+basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE) {
+  valid_methods <- c("sl", "linear", "linear_int")
+  
+  # Check if the provided method is valid
+  if (!method %in% valid_methods) {
+    stop("Invalid method. Choose one of: 'sl', 'linear', or 'linear_int'.")
+  }
   # Check if x and y are binary or continuous
   if(! is.numeric(x) | ! is.numeric(y)){
-    cat("The x and y must be numeric data")
+    stop("Error: The x and y must be numeric data")
   }
   if(! all_numeric(S)){
-    cat("The S must be numeric data or empty")
+    stop("Error: S must be empty or contain only numeric values .")
   }
   is_binary_x <- FALSE
   
@@ -45,14 +51,7 @@ basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
     y <- ifelse(y == unique_values[1], 0, 1)
     is_binary_y <- TRUE
   }
-  S2 <- as_tibble(S)
-  colnames(S2) <- paste0("X", colnames(S2))
-  is_big_S <- FALSE
-  if(is.null(S2)){
-    is_big_S <- FALSE
-  }else{
-    is_big_S <- ifelse( ncol(S2) > 4,TRUE, FALSE)
-  }
+ 
   # Check if the dimension of S is big (> 4)
   
   
@@ -68,39 +67,40 @@ basic_function <- function(x, y, S=NULL,sl=NULL,cross_fitting=FALSE,kfolds=5) {
     out_bin = FALSE
   }
   
-  roots="uni"
   
-  if(is_big_S){
-    res <- psi.hat_sl(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+  if(method=="sl"){
+    res <- psi_hat_sl(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+  }else if (method=="linear") {
+    if (!cross_fitting) {
+      res <- psi_hat_linear(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin)
+    }else{
+      stop("The cross-fitting is not available for linear method")  
+    }    
   }else{
     if (!cross_fitting) {
-      res <- psi.hat_linear(y=y,A=x,S=S2,subset = NULL,out.bin = out_bin,exp.bin=exp_bin,exp.scalar = FALSE,root=roots)
+      res <- psi_hat_linear_int(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin,two_way = two_way,three_way = three_way)
     }else{
-      cat("The cross-fitting is not available for columns of S is smaller than 4")  
-    }
+      stop("The cross-fitting is not available for linear method")  
+    }   
     
     
   }
-  # Two-sided p-value
-  # estimate <- res[1]
-  # sd_estimate <- res[2]
-  # S <- (estimate - 0) / sd_estimate
-  # 
-  # # Calculate two-sided p-value
-  # p_value_two_sided <- 2 * pnorm(-abs(S))
-  # 
-  # # Output
-  # return(list(p_value = p_value_two_sided, alpha = alpha, independent = p_value_two_sided > alpha))
   return(res)
 }
 
-multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
+multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, kfolds=5,two_way=FALSE,three_way=FALSE) {
+  valid_methods <- c("sl", "linear", "linear_int")
+  
+  # Check if the provided method is valid
+  if (!method %in% valid_methods) {
+    stop("Invalid method. Choose one of: 'sl', 'linear', or 'linear_int'.")
+  }
   # Check if x and y are binary or continuous
   if(! is.numeric(x) | ! is.numeric(y)){
-    cat("The x and y must be numeric data")
+    stop("Error: The x and y must be numeric data")
   }
   if(! all_numeric(S)){
-    cat("The S must be numeric data or empty")
+    stop("Error: S must be empty or contain only numeric values .")
   }
   dat_y <- NULL
   dat_x <- NULL
@@ -140,12 +140,12 @@ multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
   ########################################  
   if(is.null(dat_y)){
     if (is.null(dat_x)) {
-      res <- basic_function(x, y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+      res <- basic_function(x, y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
     }else{
       num_x <- ncol(dat_x)
       result <- matrix(nrow = num_x,ncol=2)
       for (i in 1:num_x) {
-        res <- basic_function(dat_x[,i], y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+        res <- basic_function(dat_x[,i], y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -159,7 +159,7 @@ multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
       num_y <- ncol(dat_y)
       result <- matrix(nrow = num_y,ncol=2)
       for (i in 1:num_y) {
-        res <- basic_function(x, dat_y[,i], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+        res <- basic_function(x, dat_y[,i], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -171,7 +171,7 @@ multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
       result <- matrix(nrow = num_x*num_y,ncol=2)
       for (i in 1:num_x) {
         for (j in 1:num_y) {
-          res <- basic_function(dat_x[,i], dat_y[,j], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+          res <- basic_function(dat_x[,i], dat_y[,j], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
           result[(i-1)*num_y+j,1] <- res[1]
           result[(i-1)*num_y+j,2] <- res[2]
         }
@@ -181,83 +181,37 @@ multi_level <- function(x, y, S,sl=c(), cross_fitting=FALSE, kfolds=5) {
     }
     
   }
-  # estimate <- res[1]
-  # sd_estimate <- res[2]
-  # S <- (estimate - 0) / sd_estimate
-  # 
-  # # Calculate two-sided p-value
-  # p_value_two_sided <- 2 * pnorm(-abs(S))
-  # 
-  # # Output
-  # return(list(p_value = p_value_two_sided, alpha = alpha, independent = p_value_two_sided > alpha))
   return(res)
   
 }
 
-#' Conditional Independence Test
-#' We test whether \code{x} and \code{y} are conditionally associated, given
-#' \code{S} 
-#' 
-#' @param x The position of the exposure variable 
-#' @param y The position of the exposure variable 
-#' @param S The position of the conditional variable set
-#' @param suffStat A list with four elements, "dat" is the dat matrix ,"sl" specifies the super learning model,"cross_fitting" indicates whether super learning is used and "kfolds" decides the folds for cross-fitting.
-#'
-#' @details This function test whether \code{x} and \code{y} is independent conditional on
-#' \code{S}. The final results includes p-value for model \code{y ~ x + S} 
-#' and \code{x ~ y+S}.
-#' @return p-value for model \code{y ~ x + S} and \code{x ~ y+S}.
-#' @export
-#'
-ORtest <- function(x,y,S,suffStat) {
-  
-  # Extract the positions of X, Y, and Z from the location vector
-  x_pos <- x
-  y_pos <- y
-  z_pos <- S
-  
-  # Ensure that X and Y positions are different
-  if (x_pos == y_pos) {
-    stop("X and Y should be at different positions.")
-  }
-  dat <- suffStat$dat
-  sl <- suffStat$sl
-  cross_fitting <- suffStat$cross_fitting
-  kfolds <- suffStat$kfolds
-  
-  
-  ### p value 1
-  # Extract X, Y, and Z variables from the dataframe
-  X <- dat[, x_pos]
-  Y <- dat[, y_pos]
-  Z <- dat[, z_pos]
-  res1 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
-  ### p value 2
-  # Extract X, Y, and Z variables from the dataframe
-  Y <- dat[, x_pos]
-  X <- dat[, y_pos]
-  Z <- dat[, z_pos]
-  res2 <- multi_level(X = X,Y= Y,Z=Z,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
-  # Return the X, Y, and Z variables in a list
-  return(list(res1,res2))
-}
+
 
 #' Conditional Independence Test
+#' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
-#' \code{S} 
+#' \code{S}, using specific methods.
 #' 
 #' @param x The position of the exposure variable 
 #' @param y The position of the exposure variable 
 #' @param S The position of the conditional variable set
-#' @param suffStat A list with four elements, "dat" is the dat matrix ,"sl" specifies the super learning model,"cross_fitting" indicates whether super learning is used and "kfolds" decides the folds for cross-fitting.
-#'
+#' @param suffStat A list with elements needed for the test:
+#'   \describe{
+#'     \item{"dat"}{Data matrix where columns represent variables.}
+#'     \item{"method"}{The method used for the test: "sl", "linear", "linear_int"}
+#'     \item{"sl"}{Specifies the super learning model. If \code{y} is numeric, the default method is linear regression model, mean response,MARS, random forest and XGBoost. If \code{y} is binary, the default method is LDA, mean response,MARS, random forest and XGBoost.}
+#'     \item{"cross_fitting"}{Logical; whether cross-fitting is used in super learning.}
+#'     \item{"kfolds"}{Number of folds for cross-fitting.}
+#'     \item{"two_way"}{Logical; whether to include two-way interactions between variables in \code{S}.}
+#'     \item{"three_way"}{Logical; whether to include three-way interactions between variables in \code{S}.}
+#'   }
 #' @details This function test whether \code{x} and \code{y} is independent conditional on
 #' \code{S}. The final result only includes p value for model \code{y ~ x + S}. 
 #' 
 #' @return p-value for model \code{y ~ x + S}.
 #' @export
 #'
-ORtest_single <- function(x,y,S,suffStat) {
+ortest <- function(x,y,S,suffStat) {
   
   # Extract the positions of x, y, and S from the location vector
   x_pos <- x
@@ -269,17 +223,19 @@ ORtest_single <- function(x,y,S,suffStat) {
     stop("x and y should be at different positions.")
   }
   dat <- suffStat$dat
+  method <- suffStat$method
   sl <- suffStat$sl
   cross_fitting <- suffStat$cross_fitting
   kfolds <- suffStat$kfolds
-  
+  two_way <- suffStat$two_way
+  three_way <- suffStat$three_way
   
   ### p value 1
   # Extract x, y, and S variables from the dataframe
   x <- dat[, x_pos]
   y <- dat[, y_pos]
   S <- dat[, s_pos]
-  res1 <- multi_level(x = x,y= y,S=S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds)
+  res1 <- multi_level(x = x,y= y,S=S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
   
   
   

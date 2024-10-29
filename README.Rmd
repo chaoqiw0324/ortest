@@ -14,7 +14,7 @@ knitr::opts_chunk$set(collapse  = TRUE,
 
 
 
-ortest <img src="man/figures/package-sticker.png" align="right" style="float:right; height:120px;"/>
+ortest <img src="man/figures/package-sticker.png" alt="Package sticker for ortest" align="right" style="float:right; height:120px;"/>
 =========================================================
 
 <!-- badges: start -->

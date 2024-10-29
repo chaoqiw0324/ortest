@@ -3,15 +3,16 @@
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
 #' @usage 
-#' psi.hat_linear(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"))
+#' psi_hat_linear(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE)
 #' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
 #' @param S Conditional variable set, can be empty
 #' @param subset Optionally, control the subset of the dataset to be used
-#' @param out.bin A logical evaluating to TRUE or FALSE indicating whether outcome variable is binary.
-#' @param exp.bin A logical evaluating to TRUE or FALSE indicating whether exposure variable is binary.
-#' @param root String specifying the method of solving equations 
+#' @param out_bin A logical evaluating to TRUE or FALSE indicating whether 
+#' outcome variable is binary.
+#' @param exp_bin A logical evaluating to TRUE or FALSE indicating whether 
+#' exposure variable is binary.
 #'
 #' @details All included variables should be either numeric or binary. If 
 #' \code{S} includes less than 4 variables, regression model is recommended. If
@@ -27,11 +28,11 @@
 
 
 
-psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = "uni"){
+psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE){
   ## Function: estimate the odds ratio parameter psi
   ## Input: 1. An outcome nuisance model, onm = f(y|L,x=0)
   ##        2. An exposure nuisance model, enm = g(x|y=0,L)
-  ## Output: A real number (vector) psi.hat, an estimate of the conditional odds ratio parameter psi
+  ## Output: A real number (vector) psi_hat, an estimate of the conditional odds ratio parameter psi
   
   
   if(length(S)==0){
@@ -48,7 +49,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
     fm_exp <- as.formula(fm_exp)
     dat <- data.frame(y,x,S)
   }
-  
+  n <-  nrow(dat)
   
   if(!is.null(subset)) y <- y[subset]
   if(!is.null(subset)) x <- x[subset,]
@@ -59,7 +60,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
   refx <- 0 
   refy <- 0
   
-  if(out.bin && exp.bin){
+  if(out_bin && exp_bin){
     h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
     dat1 <- dat
     dat2 <- dat
@@ -90,15 +91,10 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
     
     
     res <- tryCatch({
-      if (root == "uni") {
         U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
         est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
         res <-  est$root
-      }else if(root == "multi"){
-        proc <- rootSolve::multiroot(f = estimating_equation,     
-                                     start = c(-3.0))
-        res <- proc$root
-      }
+ 
     }, error = function(e) {
       # If an error occurs, set res to zero
       cat("Error encountered: ", conditionMessage(e), "\n")
@@ -124,7 +120,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
     return(result)
   }
   
-  if(!out.bin){ 
+  if(!out_bin){ 
     outcome <- glm(fm_out, family = gaussian,data = dat)
   } else outcome <- glm(fm_out, family = binomial,data = dat)
   dat1 <- dat
@@ -132,7 +128,7 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
   onm <- predict.glm(outcome, newdata=dat1,type="response")
   
   
-  if(!exp.bin){
+  if(!exp_bin){
     exposure <- glm(fm_exp, family = gaussian,data = dat)
   } else exposure <- glm(fm_exp, family = binomial,data = dat)
   dat2 <- dat
@@ -157,16 +153,204 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
     return(este)
   }   
   
-  if (root == "uni") {
     U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
     par.init <- c(0)
     sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
     res <- sol$par
-  }else if(root == "multi"){
-    proc <- rootSolve::multiroot(f = estimating_equation,     
-                                 start = c(-3.0))
-    res <- proc$root
+  
+  # Baking the bread (approximate derivative)
+  deriv <- numDeriv::jacobian(func = estimating_equation,   
+                              x = res)              
+  bread <- -1*deriv / n
+  
+  # Cooking the filling (matrix algebra)
+  outerprod <- sum(estimating_function(res) * estimating_function(res)) 
+  # alternative code using matrix algebra
+  # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root) 
+  filling <- outerprod/n 
+  
+  # Assembling the sandwich (matrix algebra)
+  sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+  se <- as.numeric(sqrt(sandwich / n))
+  
+  result <- c(res,se)
+  return(result)
+  
+}
+
+#' Regression Based Conditional Independence Test
+#' 
+#' We test whether \code{x} and \code{y} are conditionally associated, given
+#' \code{S} using a generalized linear model allowing interaction between variables in \code{S}. 
+#' @usage 
+#' psi_hat_linear_int(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,
+#'  two_way=FALSE, three_way=FALSE)
+#' 
+#' @param y Outcome variable, either binary or numeric
+#' @param x Exposure variable, either binary or numeric
+#' @param S Conditional variable set, can be empty
+#' @param subset Optionally, control the subset of the dataset to be used
+#' @param out_bin A logical evaluating to TRUE or FALSE indicating whether outcome variable is binary.
+#' @param exp_bin A logical evaluating to TRUE or FALSE indicating whether exposure variable is binary.
+#' @param two_way A logical evaluating to TRUE or FALSE indicating whether two-way interaction for S is included in regression model.
+#' @param three_way A logical evaluating to TRUE or FALSE indicating whether three-way interaction for S is included in regression model.
+#' 
+#' @details All included variables should be either numeric or binary. If 
+#' \code{S} includes less than 4 variables, regression model is recommended. If
+#' \code{y} is numeric, a linear regression model is fitted. If \code{y} is 
+#' binary, a logistical regression model is fitted. \code{x} and \code{S} are 
+#' included as explanatory variables. 
+#' This model is tested whether \code{x} and \code{y} is independent conditional on
+#' \code{S}. The final result is the test statistics and standard error.
+#' 
+#' @return Test statistics and standard error of the test. 
+#' 
+#' @export
+
+psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE, two_way=FALSE, three_way = FALSE){
+  ## Function: estimate the odds ratio parameter psi
+  ## Input: 1. An outcome nuisance model, onm = f(y|L,x=0)
+  ##        2. An exposure nuisance model, enm = g(x|y=0,L)
+  ## Output: A real number (vector) psi_hat, an estimate of the conditional odds ratio parameter psi
+  
+  
+  if(length(S)==0){
+    fm_out <- "y ~ x"
+    fm_out <- as.formula(fm_out)
+    fm_exp <- "x ~ y"
+    fm_exp <- as.formula(fm_exp) ## for cases where conditioning set is empty
+    dat <- data.frame(y,x)
+  }else{
+    Sname <- colnames(S)
+    terms <- Sname
+    
+    # Add two-way interactions if requested
+    if (two_way) {
+      two_way_terms <- combn(Sname, 2, function(vars) paste(vars, collapse = ":"))
+      terms <- c(terms, two_way_terms)
+    }
+    
+    # Add three-way interactions if requested
+    if (three_way) {
+      three_way_terms <- combn(Sname, 3, function(vars) paste(vars, collapse = ":"))
+      terms <- c(terms, three_way_terms)
+    }
+    
+    # Construct the formula
+    fm_out <- paste0("y ~ x + ", paste(terms, collapse = "+"))
+    fm_out <- as.formula(fm_out)
+    fm_exp <- paste0("x ~ y + ", paste(terms, collapse = "+"))
+    fm_exp <- as.formula(fm_exp)
+    dat <- data.frame(y,x,S)
   }
+  n <-  nrow(dat)
+  
+  if(!is.null(subset)) y <- y[subset]
+  if(!is.null(subset)) x <- x[subset,]
+  if(!is.null(subset)) S <- S[subset,]
+  #temp
+  
+  
+  refx <- 0 
+  refy <- 0
+  
+  if(out_bin && exp_bin){
+    h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
+    dat1 <- dat
+    dat2 <- dat
+    
+    outcome <- glm(fm_out,family=binomial,data = dat)
+    dat1$x <- 0 ## setting x=0
+    onm <- predict.glm(outcome, newdata=dat1,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
+    onm[y==0] <- 1-onm[y==0]
+    
+    exposure <- glm(fm_exp, family = binomial,data = dat)
+    dat2$y <- 0 ## setting y=0
+    enm <- predict.glm(exposure, newdata=dat2,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
+    enm[x==0] <- 1-enm[x==0]
+    
+    d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
+    
+    # build estimate function
+    estimating_function <- function(psi){
+      estf = d.diff*h.dag / (exp(psi*y*x)*onm*enm)
+      return(estf) 
+    }
+    
+    estimating_equation <- function(psi){
+      estf = estimating_function(psi)         
+      este = sum(estf)                       
+      return(este)
+    }
+    
+    
+    res <- tryCatch({
+
+        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+        est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+        res <-  est$root
+    }, error = function(e) {
+      # If an error occurs, set res to zero
+      cat("Error encountered: ", conditionMessage(e), "\n")
+      0
+    })
+    
+    # Baking the bread (approximate derivative)
+    deriv <- numDeriv::jacobian(func = estimating_equation,   
+                                x = res)              
+    bread <- -1*deriv / n
+    
+    # Cooking the filling (matrix algebra)
+    outerprod <- sum(estimating_function(res) * estimating_function(res)) 
+    # alternative code using matrix algebra
+    # outerprod <- t(estimating_function(mu_root)) %*% estimating_function(mu_root) 
+    filling <- outerprod/n 
+    
+    # Assembling the sandwich (matrix algebra)
+    sandwich <- (bread^-1) %*% filling %*% (bread^-1)
+    se <- as.numeric(sqrt(sandwich / n))
+    
+    result <- c(res,se)
+    return(result)
+  }
+  
+  if(!out_bin){ 
+    outcome <- glm(fm_out, family = gaussian,data = dat)
+  } else outcome <- glm(fm_out, family = binomial,data = dat)
+  dat1 <- dat
+  dat1$x <- 0 ## setting x=0
+  onm <- predict.glm(outcome, newdata=dat1,type="response")
+  
+  
+  if(!exp_bin){
+    exposure <- glm(fm_exp, family = gaussian,data = dat)
+  } else exposure <- glm(fm_exp, family = binomial,data = dat)
+  dat2 <- dat
+  dat2$y <- 0 ## setting y=0
+  enm <- predict.glm(exposure, newdata=dat2,type="response")
+  
+  
+  
+  #U <- function(psi,onm,enm){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+  #est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, onm = onm, enm = enm)
+  #return(est$root)
+  
+  # build estimate function
+  estimating_function <- function(psi){
+    estf = (y - onm)*(x - enm)*exp(-psi*y*x) 
+    return(estf) 
+  }
+  
+  estimating_equation <- function(psi){
+    estf = estimating_function(psi)         
+    este = sum(estf)                       
+    return(este)
+  }   
+  
+    U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+    par.init <- c(0)
+    sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+    res <- sol$par
   
   # Baking the bread (approximate derivative)
   deriv <- numDeriv::jacobian(func = estimating_equation,   
@@ -193,15 +377,15 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
 #' @usage 
-#' psi.hat_sl(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE, root = c("uni","multi"),sl=NULL,cross_fitting = FALSE,kfolds=5)
+#' psi_hat_sl(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE, 
+#' sl=NULL,cross_fitting = FALSE,kfolds=5)
 #' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
 #' @param S Conditional variable set, can be empty
 #' @param subset Optionally, control the subset of the dataset to be used
-#' @param out.bin A logical evaluating to TRUE or FALSE indicating whether outcome variable is binary.
-#' @param exp.bin A logical evaluating to TRUE or FALSE indicating whether exposure variable is binary.
-#' @param root String specifying the method of solving equations 
+#' @param out_bin A logical evaluating to TRUE or FALSE indicating whether outcome variable is binary.
+#' @param exp_bin A logical evaluating to TRUE or FALSE indicating whether exposure variable is binary.
 #' @param sl Character string specifying models applied in super learning
 #' @param cross_fitting A logical evaluating to TRUE or FALSE indicating whether cross-fitting is used.
 #' @param kfolds A numeric indicating how many folds is used for cross-fitting if applied
@@ -217,11 +401,11 @@ psi.hat_linear <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin =
 #' 
 #' @export
 #' 
-psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FALSE,  root = "uni",sl=NULL,cross_fitting = FALSE,kfolds=5){
+psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,sl=NULL,cross_fitting = FALSE,kfolds=5){
   ## Function: estimate the odds ratio parameter psi
   ## Input: 1. An outcome nuisance model, onm = f(y|S,x=0)
   ##        2. An exposure nuisance model, enm = g(x|y=0,S)
-  ## Output: A real number (vector) psi.hat_ranger, an estimate of the conditional odds ratio parameter psi
+  ## Output: A real number (vector) psi_hat_ranger, an estimate of the conditional odds ratio parameter psi
   
   ## Todo: generalize estimating eq to arbitrary dimensions
   
@@ -230,7 +414,8 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
   X_out <- data.frame(x, S)
   Y_out <- data.frame(y)
   
-  
+  dat <- data.frame(y,x,S)
+  n <-  nrow(dat)
   if (!is.null(subset)) y <- y[subset]
   if (!is.null(subset)) x <- x[subset,]
   if (!is.null(subset)) S <- S[subset,]
@@ -271,7 +456,7 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
     ################################ No Cross_Fitting
     
     
-    if(out.bin && exp.bin){
+    if(out_bin && exp_bin){
       h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
       # outcome 
       ## outcome tune parameter 
@@ -319,15 +504,10 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
       
       
       res <- tryCatch({
-        if (root == "uni") {
+
           U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
           est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
           res <-  est$root
-        }else if(root == "multi"){
-          proc <- rootSolve::multiroot(f = estimating_equation,     
-                                       start = c(-3.0))
-          res <- proc$root
-        }
       }, error = function(e) {
         # If an error occurs, set res to zero
         cat("Error encountered: ", conditionMessage(e), "\n")
@@ -358,7 +538,7 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
     
     # at least one variable is non-bianry  
     
-    if(!out.bin){
+    if(!out_bin){
       
       X_out_new <- X_out
       Y_out$y1 <- (Y_out$y-mean(Y_out$y))/sd(Y_out$y)
@@ -387,7 +567,7 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
     }
     
     
-    if(!exp.bin){
+    if(!exp_bin){
       X_exp_new <- X_exp
       Y_exp$x1 <- (Y_exp$x-mean(Y_exp$x))/sd(Y_exp$x)
       
@@ -429,16 +609,10 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
     
     
     res <- tryCatch({
-      if (root == "uni") {
         U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
         par.init <- c(0)
         sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
         res <- sol$par
-      }else if(root == "multi"){
-        proc <- rootSolve::multiroot(f = estimating_equation,     
-                                     start = c(-3.0))
-        res <- proc$root
-      }
     }, error = function(e) {
       # If an error occurs, set res to zero
       cat("Error encountered: ", conditionMessage(e), "\n")
@@ -475,7 +649,7 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
       test_indices <- folds[[i]]
       train_indices <- setdiff(1:nrow(dat), test_indices)
       
-      if(out.bin && exp.bin){
+      if(out_bin && exp_bin){
         h.dag <- 0.25 ## probability f.dag(y|S) = g.dag(x|S) = 0.5, i.e., y ~ x ~ Bernoulli(0.5)
         X_out_train  <- as_tibble(X_out[train_indices,])
         colnames(X_out_train) <- colnames(X_out)
@@ -536,7 +710,6 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
           return(este)
         }
         res <- tryCatch({
-          if (root == "uni") {
             # U <- function(psi, onm, enm, d.diff) { 
             #   sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
             # }
@@ -549,10 +722,6 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
             par.init <- c(0)
             sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
             sol$par
-          } else if (root == "multi") {
-            proc <- rootSolve::multiroot(f = estimating_equation, start = c(-3.0))
-            proc$root
-          }
         }, error = function(e) {
           # If an error occurs, set res to zero
           cat("Error encountered: ", conditionMessage(e), "\n")
@@ -582,7 +751,7 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
         next
       }
       
-      if(!out.bin){
+      if(!out_bin){
         X_out_train  <- as_tibble(X_out[train_indices,])
         colnames(X_out_train) <- colnames(X_out)
         
@@ -630,7 +799,7 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
       }
       
       
-      if(!exp.bin){
+      if(!exp_bin){
         X_exp_train  <- as_tibble(X_exp[train_indices,])
         colnames(X_exp_train) <- colnames(X_exp)
         
@@ -691,15 +860,10 @@ psi.hat_sl <- function(y, x, S=c(), subset = NULL, out.bin = TRUE, exp.bin = FAL
       }
       
       res <- tryCatch({
-        if (root == "uni") {
           U <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
           par.init <- c(0)
           sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
           sol$par
-        } else if (root == "multi") {
-          proc <- rootSolve::multiroot(f = estimating_equation, start = c(-3.0))
-          proc$root
-        }
       }, error = function(e) {
         # If an error occurs, set res to zero
         cat("Error encountered: ", conditionMessage(e), "\n")
