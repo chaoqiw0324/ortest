@@ -17,6 +17,5 @@
 .Renviron
 
 # User-specific files ----
-README.html
 inst/doc
-docs
+
