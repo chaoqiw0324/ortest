@@ -187,7 +187,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
 
 
 
-#' Conditional Independence Test
+#' Super-Learning Based Conditional Independence Test
 #' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S}, using specific methods.
@@ -210,7 +210,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
 #' 
 #' @return p-value for model \code{y ~ x + S}.
 #' @export
-#'
+#' @name ortest_function
 ortest <- function(x,y,S,suffStat) {
   
   # Extract the positions of x, y, and S from the location vector

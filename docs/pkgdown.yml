@@ -3,4 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   ortest: ortest.html
-last_built: 2024-10-29T04:49Z
+last_built: 2024-10-29T05:28Z
+urls:
+  reference: https://chaoqiw0324.github.io/ortest/reference
+  article: https://chaoqiw0324.github.io/ortest/articles

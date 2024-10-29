@@ -2,7 +2,7 @@
 % Please edit documentation in R/psi_hat.R
 \name{psi_hat_linear_int}
 \alias{psi_hat_linear_int}
-\title{Regression Based Conditional Independence Test}
+\title{Regression Based With Interaction Conditional Independence Test}
 \usage{
 psi_hat_linear_int(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,
  two_way=FALSE, three_way=FALSE)

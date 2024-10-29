@@ -178,7 +178,7 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
   
 }
 
-#' Regression Based Conditional Independence Test
+#' Regression Based With Interaction Conditional Independence Test
 #' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model allowing interaction between variables in \code{S}. 

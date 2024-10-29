@@ -138,7 +138,7 @@ Moreover, `ortest()` also detect multi-level factor. The factor which the levels
 
 `ortest()` will return the p-value for $y \sim x+S$.
 
-```{r}
+```{r echo=FALSE}
 generate_dataset <- function(n = 1000) {
   # Set seed for reproducibility
   set.seed(123)
@@ -197,9 +197,9 @@ ortest(5,6,c(1:4,7:10),list(dat = data,method="sl", sl=NULL,cross_fitting=TRUE,k
 ```
 
 
+`ortest()` also can be used with pc algorithm 
 
-
-```{r,message=FALSE,warning=FALSE,error=FALSE}
+```{r, message=FALSE,warning=FALSE,error=FALSE}
 V <- colnames(data)
 pc.fit <- pc(suffStat = list(dat = data,method="linear",sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE),
              indepTest = ortest, ## indep.test: partial correlations
@@ -207,6 +207,6 @@ pc.fit <- pc(suffStat = list(dat = data,method="linear",sl=NULL,cross_fitting=FA
 ```
 
 
-```{r,message=FALSE,warning=FALSE,error=FALSE,fig.cap = "PC Plot showing the potential relationship"}
+```{r,echo = F,message=FALSE,warning=FALSE,error=FALSE,fig.cap = "PC Plot showing the potential relationship"}
 plot(pc.fit)
 ```
