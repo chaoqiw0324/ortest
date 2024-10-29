@@ -14,12 +14,7 @@
 #' @param exp_bin A logical evaluating to TRUE or FALSE indicating whether 
 #' exposure variable is binary.
 #'
-#' @details All included variables should be either numeric or binary. If 
-#' \code{S} includes less than 4 variables, regression model is recommended. If
-#' \code{y} is numeric, a linear regression model is fitted. If \code{y} is 
-#' binary, a logistical regression model is fitted. \code{x} and \code{S} are 
-#' included as explanatory variables. 
-#' This model is tested whether \code{x} and \code{y} is independent conditional on
+#' @details This model is tested whether \code{x} and \code{y} is independent conditional on
 #' \code{S}. The final result is the test statistics and standard error.
 #' 
 #' @return Test statistics and standard error of the test. 
@@ -195,11 +190,7 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
 #' @param two_way A logical evaluating to TRUE or FALSE indicating whether two-way interaction for S is included in regression model.
 #' @param three_way A logical evaluating to TRUE or FALSE indicating whether three-way interaction for S is included in regression model.
 #' 
-#' @details All included variables should be either numeric or binary. If 
-#' \code{S} includes less than 4 variables, regression model is recommended. If
-#' \code{y} is numeric, a linear regression model is fitted. If \code{y} is 
-#' binary, a logistical regression model is fitted. \code{x} and \code{S} are 
-#' included as explanatory variables. 
+#' @details 
 #' This model is tested whether \code{x} and \code{y} is independent conditional on
 #' \code{S}. The final result is the test statistics and standard error.
 #' 
@@ -390,8 +381,7 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
 #' @param cross_fitting A logical evaluating to TRUE or FALSE indicating whether cross-fitting is used.
 #' @param kfolds A numeric indicating how many folds is used for cross-fitting if applied
 #'
-#' @details All included variables should be either numeric or binary. If \code{S} includes more than 4 variables,
-#' super learning method is recommended. If \code{y} is numeric, the default method 
+#' @details All included variables should be either numeric or binary. If \code{y} is numeric, the default method 
 #' is linear regression model, mean response,MARS, random forest and XGBoost. If 
 #' \code{y} is binary, the default method is LDA, mean response,MARS, random forest 
 #' and XGBoost.

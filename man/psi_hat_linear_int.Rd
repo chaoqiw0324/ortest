@@ -32,11 +32,6 @@ We test whether \code{x} and \code{y} are conditionally associated, given
 \code{S} using a generalized linear model allowing interaction between variables in \code{S}.
 }
 \details{
-All included variables should be either numeric or binary. If
-\code{S} includes less than 4 variables, regression model is recommended. If
-\code{y} is numeric, a linear regression model is fitted. If \code{y} is
-binary, a logistical regression model is fitted. \code{x} and \code{S} are
-included as explanatory variables.
 This model is tested whether \code{x} and \code{y} is independent conditional on
 \code{S}. The final result is the test statistics and standard error.
 }

@@ -34,8 +34,7 @@ We test whether \code{x} and \code{y} are conditionally associated, given
 \code{S} using a generalized linear model.
 }
 \details{
-All included variables should be either numeric or binary. If \code{S} includes more than 4 variables,
-super learning method is recommended. If \code{y} is numeric, the default method
+All included variables should be either numeric or binary. If \code{y} is numeric, the default method
 is linear regression model, mean response,MARS, random forest and XGBoost. If
 \code{y} is binary, the default method is LDA, mean response,MARS, random forest
 and XGBoost.
