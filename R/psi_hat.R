@@ -37,12 +37,13 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
     fm_exp <- as.formula(fm_exp) ## for cases where conditioning set is empty
     dat <- data.frame(y,x)
   }else{
-    covnames <- colnames(S)
+    dat <- data.frame(y, x, S)
+    all_colnames <- colnames(dat)
+    covnames <- all_colnames[!all_colnames %in% c("y", "x")]
     fm_out <- paste0("y ~ x + ", paste(covnames, collapse = "+"))
     fm_out <- as.formula(fm_out)
     fm_exp <- paste0("x ~ y + ", paste(covnames, collapse = "+"))
     fm_exp <- as.formula(fm_exp)
-    dat <- data.frame(y,x,S)
   }
   n <-  nrow(dat)
   
@@ -212,9 +213,11 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     fm_exp <- as.formula(fm_exp) ## for cases where conditioning set is empty
     dat <- data.frame(y,x)
   }else{
-    Sname <- colnames(S)
-    terms <- Sname
-    
+    # Sname <- colnames(S)
+    # terms <- Sname
+    dat <- data.frame(y, x, S)
+    all_colnames <- colnames(dat)
+    terms <- all_colnames[!all_colnames %in% c("y", "x")]
     # Add two-way interactions if requested
     if (two_way) {
       two_way_terms <- combn(Sname, 2, function(vars) paste(vars, collapse = ":"))
@@ -232,7 +235,7 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     fm_out <- as.formula(fm_out)
     fm_exp <- paste0("x ~ y + ", paste(terms, collapse = "+"))
     fm_exp <- as.formula(fm_exp)
-    dat <- data.frame(y,x,S)
+    # dat <- data.frame(y,x,S)
   }
   n <-  nrow(dat)
   

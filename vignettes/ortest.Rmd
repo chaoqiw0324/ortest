@@ -2,12 +2,12 @@
 title: "Using the ortest package"
 author: "Chaoqi Wu and Daniel Malinsky"
 output:
-  rmarkdown::html_vignette: default
   rmarkdown::html_document: default
+  rmarkdown::html_vignette: default
 vignette: >
   %\\VignetteIndexEntry{Using the ortest package} 
-  %\\VignetteEngine{knitr::rmarkdown}
   %\\VignetteEncoding{UTF-8}
+  %\\VignetteEngine{knitr::rmarkdown}
 ---
 
 
@@ -21,7 +21,7 @@ library(ortest)
 library(pcalg)
 ```
 
-In this vignette, we will introduce the main functions provided in  __`ortest`__ package, including `psi_hat_linear()`, `psi_hat_sl()`, `basic_function()`,`multi_level()` and `OR_test()`.
+In this vignette, we will introduce the main functions provided in  __`ortest`__ package, including `psi_hat_linear()`, `psi_hat_sl()`, `basic_function()`,`multi_level()` and `ortest()`.
 
 ## psi_hat
 
@@ -139,46 +139,9 @@ Moreover, `ortest()` also detect multi-level factor. The factor which the levels
 `ortest()` will return the p-value for $y \sim x+S$.
 
 ```{r echo=FALSE}
-generate_dataset <- function(n = 1000) {
-  # Set seed for reproducibility
-  set.seed(123)
-  
-  # Generate numeric columns
-  col1 <- rnorm(n)
-  col4 <- rnorm(n)
-  col7 <- rnorm(n)
-  col9 <- rnorm(n)
-  
-  # Generate binary columns (0 or 1)
-  col2 <- sample(c(0, 1), n, replace = TRUE)
-  col3 <- sample(c(0, 1), n, replace = TRUE)
-  col8 <- sample(c(0, 1), n, replace = TRUE)
-  
-  # Generate multi-level categorical columns (1, 2, 3, 4)
-  col5 <- sample(1:4, n, replace = TRUE)
-  col6 <- sample(1:4, n, replace = TRUE)
-  col10 <- sample(1:4, n, replace = TRUE)
-  
-  # Combine all columns into a data frame
-  data <- data.frame(
-    var1 = col1,
-    var2 = col2,
-    var3 = col3,
-    var4 = col4,
-    var5 = col5,
-    var6 = col6,
-    var7 = col7,
-    var8 = col8,
-    var9 = col9,
-    var10 = col10
-  )
-  
-  return(data)
-}
-
 # Generate the dataset
 set.seed(2024)
-data <- generate_dataset()
+data <- generate_test_data()
 ```
 
 ```{r eval=FALSE}
