@@ -220,13 +220,13 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     terms <- all_colnames[!all_colnames %in% c("y", "x")]
     # Add two-way interactions if requested
     if (two_way) {
-      two_way_terms <- combn(Sname, 2, function(vars) paste(vars, collapse = ":"))
+      two_way_terms <- combn(terms, 2, function(vars) paste(vars, collapse = ":"))
       terms <- c(terms, two_way_terms)
     }
     
     # Add three-way interactions if requested
     if (three_way) {
-      three_way_terms <- combn(Sname, 3, function(vars) paste(vars, collapse = ":"))
+      three_way_terms <- combn(terms, 3, function(vars) paste(vars, collapse = ":"))
       terms <- c(terms, three_way_terms)
     }
     
