@@ -140,12 +140,12 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
   ########################################  
   if(is.null(dat_y)){
     if (is.null(dat_x)) {
-      res <- basic_function(x, y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+      res <- basic_function(x, y, S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
     }else{
       num_x <- ncol(dat_x)
       result <- matrix(nrow = num_x,ncol=2)
       for (i in 1:num_x) {
-        res <- basic_function(dat_x[,i], y, S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+        res <- basic_function(dat_x[,i], y, S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -159,7 +159,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
       num_y <- ncol(dat_y)
       result <- matrix(nrow = num_y,ncol=2)
       for (i in 1:num_y) {
-        res <- basic_function(x, dat_y[,i], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+        res <- basic_function(x, dat_y[,i], S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -171,7 +171,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
       result <- matrix(nrow = num_x*num_y,ncol=2)
       for (i in 1:num_x) {
         for (j in 1:num_y) {
-          res <- basic_function(dat_x[,i], dat_y[,j], S,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+          res <- basic_function(dat_x[,i], dat_y[,j], S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
           result[(i-1)*num_y+j,1] <- res[1]
           result[(i-1)*num_y+j,2] <- res[2]
         }
@@ -232,8 +232,8 @@ ortest <- function(x,y,S,suffStat) {
   
   ### p value 1
   # Extract x, y, and S variables from the dataframe
-  x <- dat[, x_pos]
-  y <- dat[, y_pos]
+  x <- dat[[x_pos]]
+  y <- dat[[y_pos]]
   S <- dat[, s_pos]
   res1 <- multi_level(x = x,y= y,S=S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
   

@@ -15,20 +15,20 @@ generate_test_data <- function(N=2000){
   
   for(i in 1:N){
     if(data[i,6] <= quantile(data[,6],.33)) data[i,6] <- 1
-    else if(data[i,6] <= quantile(data[,6],.66)) data[i,6] <- 2
+    else if(quantile(data[,6],.33) <= data[i,6] & data[i,6] <= quantile(data[,6],.66)) data[i,6] <- 2
     else data[i,6] <- 3
   }
   
   for(i in 1:N){
     if(data[i,10] <= quantile(data[,10],.33)) data[i,10] <- 1
-    else if(data[i,10] <= quantile(data[,10],.66)) data[i,10] <- 2
+    else if(quantile(data[,10],.33) <= data[i,10] & data[i,10] <= quantile(data[,10],.66)) data[i,10] <- 2
     else data[i,10] <- 3
   }
   
   for(i in 1:N){
     if(data[i,5] <= quantile(data[,5],.25)) data[i,5] <- 1
-    else if(data[i,5] <= quantile(data[,5],.50)) data[i,5] <- 2
-    else if(data[i,5] <= quantile(data[,5],.75)) data[i,5] <- 3
+    else if(quantile(data[,5],.25) <= data[i,5] & data[i,5] <= quantile(data[,5],.50)) data[i,5] <- 2
+    else if(quantile(data[,5],.50) <= data[i,5] & data[i,5] <= quantile(data[,5],.75)) data[i,5] <- 3
     else data[i,5] <- 4
   }
   

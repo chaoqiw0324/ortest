@@ -138,8 +138,8 @@ Moreover, `ortest()` also detect multi-level factor. The factor which the levels
 
 ```{r echo=FALSE}
 # Generate the dataset
-set.seed(2024)
-data <- generate_test_data()
+set.seed(2025)
+data <- generate_test_data(N = 2000)
 ```
 
 ```{r eval=FALSE}
@@ -164,7 +164,8 @@ ortest(5,6,c(1:4,7:10),list(dat = data,method="sl", sl=NULL,cross_fitting=TRUE,k
 V <- colnames(data)
 pc.fit <- pc(suffStat = list(dat = data,method="linear",sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE),
              indepTest = ortest, ## indep.test: partial correlations
-             alpha=0.01, labels = V, verbose = FALSE)
+             alpha=0.01, labels = V, verbose = TRUE)
+# ortest(5,8,c(),list(dat = data,method="linear", sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE))
 ```
 
 
