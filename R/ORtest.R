@@ -232,8 +232,8 @@ ortest <- function(x,y,S,suffStat) {
   
   ### p value 1
   # Extract x, y, and S variables from the dataframe
-  x <- dat[[x_pos]]
-  y <- dat[[y_pos]]
+  x <- dat[, x_pos]
+  y <- dat[, y_pos]
   S <- dat[, s_pos]
   res1 <- multi_level(x = x,y= y,S=S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
   
