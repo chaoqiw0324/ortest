@@ -17,6 +17,7 @@ knitr::opts_chunk$set(comment = NA)
 
 
 ```{r setup,echo=FALSE,message=FALSE}
+# remotes::install_github("chaoqiw0324/ortest")
 library(ortest)
 library(pcalg)
 ```

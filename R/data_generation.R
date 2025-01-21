@@ -44,7 +44,7 @@ generate_test_data <- function(N=2000){
   data[,8] <- ifelse(data[,8]<=median(data[,8]),0,1)
   data[,5] <- create_multi_level_factor(data[,5], levels = 4)
   data[,6] <- create_multi_level_factor(data[,6], levels = 3)
-  data[,8] <- create_multi_level_factor(data[,8], levels = 3)
+  data[,10] <- create_multi_level_factor(data[,10], levels = 3)
   
   # for(i in 1:N){
   #   if(data[i,6] <= quantile(data[,6],.33)) data[i,6] <- 1
