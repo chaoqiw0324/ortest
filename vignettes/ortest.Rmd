@@ -165,8 +165,7 @@ ortest(5,6,c(1:4,7:10),list(dat = data,method="sl", sl=NULL,cross_fitting=TRUE,k
 V <- colnames(data)
 pc.fit <- pc(suffStat = list(dat = data,method="linear",sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE),
              indepTest = ortest, ## indep.test: partial correlations
-             alpha=0.01, labels = V, verbose = FALSE)
-# ortest(5,7,c(),list(dat = data,method="linear", sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE))
+             alpha=0.01, labels = V, verbose = TRUE)
 ```
 
 
