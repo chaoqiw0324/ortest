@@ -6,7 +6,7 @@
 #' @import SuperLearner 
 #' @import stats
 #' @import pcalg
-#' @import tidyverse
+#' @import dplyr
 #' @importFrom numDeriv jacobian
 #' @importFrom rootSolve multiroot
 #' @importFrom utils combn
