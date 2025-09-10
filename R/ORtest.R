@@ -193,7 +193,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
 #' \code{S}, using specific methods.
 #' 
 #' @param x The position of the exposure variable 
-#' @param y The position of the exposure variable 
+#' @param y The position of the outcome variable 
 #' @param S The position of the conditional variable set
 #' @param suffStat A list with elements needed for the test:
 #'   \describe{

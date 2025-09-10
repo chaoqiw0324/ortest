@@ -10,7 +10,7 @@ ortest(x, y, S, suffStat)
 \arguments{
 \item{x}{The position of the exposure variable}
 
-\item{y}{The position of the exposure variable}
+\item{y}{The position of the outcome variable}
 
 \item{S}{The position of the conditional variable set}
 

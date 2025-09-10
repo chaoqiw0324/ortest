@@ -30,7 +30,7 @@ Imports:
     lubridate,
     pcalg,
     stats,
+    dplyr,
     SuperLearner
 Depends: 
-    R (>= 3.5.0),
-    tidyverse
+    R (>= 3.5.0)
