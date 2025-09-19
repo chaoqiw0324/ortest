@@ -32,8 +32,12 @@ basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting
     # Identify the two unique values
     unique_values <- unique(x)
     # Convert to 0 and 1
-    x <- ifelse(x == unique_values[1], 0, 1)
     is_binary_x <- TRUE
+    if (all(sort(unique_values) == c(0, 1))) {
+      x <- x
+    } else {
+      x <- ifelse(x == unique_values[1], 0, 1)
+    }
   }
   
   # Check if the variable is a factor with exactly two levels
@@ -48,7 +52,11 @@ basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting
     # Identify the two unique values
     unique_values <- unique(y)
     # Convert to 0 and 1
-    y <- ifelse(y == unique_values[1], 0, 1)
+    if (all(sort(unique_values) == c(0, 1))) {
+      y <- y
+    } else {
+      y <- ifelse(y == unique_values[1], 0, 1)
+    }
     is_binary_y <- TRUE
   }
  
