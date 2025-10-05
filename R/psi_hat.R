@@ -780,15 +780,23 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         Y_out_test   <- as_tibble(Y_out[test_indices,])
         colnames(Y_out_test) <- colnames(Y_out)
         
-        outcome <- SuperLearner(Y =Y_out_train$y,
+        Y_out_mean_train <- mean(Y_out_train$y)
+        Y_out_sd_train <- sd(Y_out_train$y)
+        
+        Y_out_train$y1 <- (Y_out_train$y - Y_out_mean_train) / Y_out_sd_train
+        outcome <- SuperLearner(Y =Y_out_train$y1,
                                 X = X_out_train,
                                 family = binomial(),
                                 SL.library = sl_binomial)
+        X_out_test_new <- X_out_test
+        X_out_test_new$x <- 0 ## setting x=0
         
+        # Prediction is on the SCALED outcome
+        onm_scaled <- predict(outcome, newdata = X_out_test_new)$pred
         
-        X_out_test$x <- 0 ## setting x=0
-        onm <- predict(outcome, newdata = X_out_test)$pred
-        # onm <- predict(outcome, data=dat1,type="prob")[,2]
+        # Unscale the prediction back to original Y units
+        onm <- onm_scaled * Y_out_sd_train + Y_out_mean_train
+        
       }
       
       
@@ -804,16 +812,25 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         
         Y_exp_test   <- as_tibble(Y_exp[test_indices,])
         colnames(Y_exp_test) <- colnames(Y_exp)
+
+        Y_exp_mean_train <- mean(Y_exp_train$x)
+        Y_exp_sd_train <- sd(Y_exp_train$x)
         
-        Y_exp_train$x1 <- Y_exp_train$x
+        Y_exp_train$x1 <- (Y_exp_train$x - Y_exp_mean_train) / Y_exp_sd_train
         exposure <- SuperLearner(Y = Y_exp_train$x1,
                                  X = X_exp_train,
                                  family = gaussian(),
                                  SL.library = sl_gaussian)
         
-        X_exp_test$y <- 0 ## setting y=0
-        # enm <- predict(exposure, data=dat2,type="response")$predictions
-        enm <- predict(exposure, newdata = X_exp_test)$pred
+        # Predict on TEST data (y=0)
+        X_exp_test_new <- X_exp_test
+        X_exp_test_new$y <- 0 ## setting y=0
+        
+        # Prediction is on the SCALED exposure
+        enm_scaled <- predict(exposure, newdata = X_exp_test_new)$pred
+        
+        # Unscale the prediction back to original X units
+        enm <- enm_scaled * Y_exp_sd_train + Y_exp_mean_train
         
       }else{
         X_exp_train  <- as_tibble(X_exp[train_indices,])
