@@ -434,8 +434,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
   if (!all(sl %in% allowed_methods)) {
     stop("Some elements in 'sl' do not exist in the list of allowed methods.")
   }
-  sl_bin <- c("SL.lda","SL.mean","SL.earth", "SL.ranger","SL.xgboost")
-  sl_gau <- c("SL.glm","SL.mean","SL.earth", "SL.ranger","SL.xgboost")
+  sl_bin <- c("SL.glm","SL.mean","SL.earth","SL.xgboost")
+  sl_gau <- c("SL.glm","SL.mean","SL.earth","SL.xgboost")
   if(! is.null(sl)){
     # Combine 'sl' with 'sl_existing'
     sl_binomial <- sl
@@ -456,10 +456,13 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       
       X_out_new <- X_out
       Y_out1 <- Y_out
-      outcome <- SuperLearner(Y =Y_out1$y,
+      outcome <- SuperLearner(Y = Y_out1$y,
                               X = X_out,
                               family = binomial(),
-                              SL.library = sl_binomial)
+                              SL.library = sl_binomial,
+                              method = "method.AUC",
+                              cvControl = list(V = 5, stratifyCV = TRUE)
+                              )
       
       X_out_new$x <- 0 ## setting x=0
       onm <- predict(outcome, X=X_out_new)$pred
@@ -475,7 +478,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       exposure <- SuperLearner(Y = Y_exp1$x,
                                X = X_exp,
                                family = binomial(),
-                               SL.library = sl_binomial)
+                               SL.library = sl_binomial,
+                               method = "method.AUC",
+                               cvControl = list(V = 5, stratifyCV = TRUE))
       X_exp_new$y <- 0 ## setting y=0
       enm <- predict(exposure, X = X_exp_new)$pred
       # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
@@ -540,7 +545,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       outcome <- SuperLearner(Y = Y_out$y1,
                               X = X_out,
                               family = gaussian(),
-                              SL.library = sl_gaussian)
+                              SL.library = sl_gaussian,
+                              cvControl = list(V = 5))
       # onm <- predict(outcome, data=dat1,type="response")$prediction
       onm <- predict(outcome, X = X_out_new)$pred
       onm <- onm*sd(Y_out$y)+mean(Y_out$y)
@@ -551,7 +557,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       outcome <- SuperLearner(Y =Y_out1$y,
                               X = X_out,
                               family = binomial(),
-                              SL.library = sl_binomial)
+                              SL.library = sl_binomial,
+                              method = "method.AUC",
+                              cvControl = list(V = 5, stratifyCV = TRUE))
       
       X_out_new$x <- 0 ## setting x=0
       onm <- predict(outcome, X = X_out_new)$pred
@@ -569,7 +577,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       exposure <- SuperLearner(Y = Y_exp$x1,
                                X = X_exp,
                                family = gaussian(),
-                               SL.library = sl_gaussian)
+                               SL.library = sl_gaussian,
+                               cvControl = list(V = 5))
       X_exp_new$y <- 0 ## setting y=0
       # enm <- predict(exposure, data=dat2,type="response")$predictions
       enm <- predict(exposure, X = X_exp_new)$pred
@@ -581,7 +590,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       exposure <- SuperLearner(Y = Y_exp1$x,
                                X = X_exp,
                                family = binomial(),
-                               SL.library = sl_binomial)
+                               SL.library = sl_binomial,
+                               method = "method.AUC",
+                               cvControl = list(V = 5, stratifyCV = TRUE))
       X_exp_new$y <- 0 ## setting Y=0
       enm <- predict(exposure, X=X_exp_new)$pred
       # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
@@ -659,7 +670,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         outcome <- SuperLearner(Y =Y_out_train$y,
                                 X = X_out_train,
                                 family = binomial(),
-                                SL.library = sl_binomial)
+                                SL.library = sl_binomial,
+                                method = "method.AUC",
+                                cvControl = list(V = 5, stratifyCV = TRUE))
         
         X_out_test$x <- 0 ## setting x=0
         onm <- predict(outcome, newdata=X_out_test)$pred
@@ -682,7 +695,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         exposure <- SuperLearner(Y = Y_exp_train$x,
                                  X = X_exp_train,
                                  family = binomial(),
-                                 SL.library = sl_binomial)
+                                 SL.library = sl_binomial,
+                                 method = "method.AUC",
+                                 cvControl = list(V = 5, stratifyCV = TRUE))
         
         
         X_exp_test$y <- 0 ## setting y=0
@@ -761,7 +776,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         outcome <- SuperLearner(Y = Y_out_train$y1,
                                 X = X_out_train,
                                 family = gaussian(),
-                                SL.library = sl_gaussian)
+                                SL.library = sl_gaussian,
+                                cvControl = list(V = 5))
         
         
         X_out_test$x <- 0 ## setting x=0
@@ -787,7 +803,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         outcome <- SuperLearner(Y =Y_out_train$y1,
                                 X = X_out_train,
                                 family = binomial(),
-                                SL.library = sl_binomial)
+                                SL.library = sl_binomial,
+                                method = "method.AUC",
+                                cvControl = list(V = 5, stratifyCV = TRUE))
         X_out_test_new <- X_out_test
         X_out_test_new$x <- 0 ## setting x=0
         
@@ -820,7 +838,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         exposure <- SuperLearner(Y = Y_exp_train$x1,
                                  X = X_exp_train,
                                  family = gaussian(),
-                                 SL.library = sl_gaussian)
+                                 SL.library = sl_gaussian,
+                                 cvControl = list(V = 5))
         
         # Predict on TEST data (y=0)
         X_exp_test_new <- X_exp_test
@@ -848,7 +867,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         exposure <- SuperLearner(Y = Y_exp_train$x,
                                  X = X_exp_train,
                                  family = binomial(),
-                                 SL.library = sl_binomial)
+                                 SL.library = sl_binomial,
+                                 method = "method.AUC",
+                                 cvControl = list(V = 5, stratifyCV = TRUE))
         
         
         X_exp_test$y <- 0 ## setting y=0
