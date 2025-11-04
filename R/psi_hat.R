@@ -772,7 +772,10 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         Y_out_test   <- as_tibble(Y_out[test_indices,])
         colnames(Y_out_test) <- colnames(Y_out)
         
-        Y_out_train$y1 <- Y_out_train$y
+        Y_out_mean_train <- mean(Y_out_train$y)
+        Y_out_sd_train <- sd(Y_out_train$y)        
+        
+        Y_out_train$y1 <- (Y_out_train$y - Y_out_mean_train) / Y_out_sd_train
         outcome <- SuperLearner(Y = Y_out_train$y1,
                                 X = X_out_train,
                                 family = gaussian(),
@@ -780,9 +783,14 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                 cvControl = list(V = 5))
         
         
-        X_out_test$x <- 0 ## setting x=0
+        X_out_test_new <- X_out_test
+        X_out_test_new$x <- 0 ## setting x=0
         # onm <- predict(outcome, data=dat1,type="response")$prediction
-        onm <- predict(outcome, newdata = X_out_test)$pred
+        # Prediction is on the SCALED outcome
+        onm_scaled <- predict(outcome, newdata = X_out_test_new)$pred
+        
+        # Unscale the prediction back to original Y units
+        onm <- onm_scaled * Y_out_sd_train + Y_out_mean_train
       }else{
         X_out_train  <- as_tibble(X_out[train_indices,])
         colnames(X_out_train) <- colnames(X_out)
@@ -796,24 +804,17 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         Y_out_test   <- as_tibble(Y_out[test_indices,])
         colnames(Y_out_test) <- colnames(Y_out)
         
-        Y_out_mean_train <- mean(Y_out_train$y)
-        Y_out_sd_train <- sd(Y_out_train$y)
-        
-        Y_out_train$y1 <- (Y_out_train$y - Y_out_mean_train) / Y_out_sd_train
-        outcome <- SuperLearner(Y =Y_out_train$y1,
+        outcome <- SuperLearner(Y = Y_out_train$y1,
                                 X = X_out_train,
                                 family = binomial(),
                                 SL.library = sl_binomial,
                                 method = "method.AUC",
                                 cvControl = list(V = 5, stratifyCV = TRUE))
-        X_out_test_new <- X_out_test
-        X_out_test_new$x <- 0 ## setting x=0
+        X_out_test$x <- 0 ## setting x=0
         
         # Prediction is on the SCALED outcome
-        onm_scaled <- predict(outcome, newdata = X_out_test_new)$pred
-        
-        # Unscale the prediction back to original Y units
-        onm <- onm_scaled * Y_out_sd_train + Y_out_mean_train
+        onm_<- predict(outcome, newdata = X_out_test)$pred
+
         
       }
       
