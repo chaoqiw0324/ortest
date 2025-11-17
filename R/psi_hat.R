@@ -64,12 +64,12 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
     outcome <- glm(fm_out,family=binomial,data = dat)
     dat1$x <- 0 ## setting x=0
     onm <- predict.glm(outcome, newdata=dat1,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
-    onm[y==0] <- 1-onm[y==0]
+    onm <- ifelse(onm==0,1,onm)
     
     exposure <- glm(fm_exp, family = binomial,data = dat)
     dat2$y <- 0 ## setting y=0
     enm <- predict.glm(exposure, newdata=dat2,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
-    enm[x==0] <- 1-enm[x==0]
+    enm <- ifelse(enm==0,1,enm)
     
     d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
     
@@ -115,21 +115,41 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
     result <- c(res,se)
     return(result)
   }
-  
-  if(!out_bin){ 
-    outcome <- glm(fm_out, family = gaussian,data = dat)
-  } else outcome <- glm(fm_out, family = binomial,data = dat)
-  dat1 <- dat
-  dat1$x <- 0 ## setting x=0
-  onm <- predict.glm(outcome, newdata=dat1,type="response")
-  
+  if(!out_bin){
+    mean_y <- mean(dat$y)
+    sd_y <- sd(dat$y)
+    dat0 <- dat
+    dat0$y <- (dat0$y-mean_y)/sd_y
+    outcome <- glm(fm_out, family = gaussian,data = dat0)
+    dat1 <- dat
+    dat1$x <- 0 ## setting x=0
+    onm <- predict.glm(outcome, newdata=dat1,type="response")
+    onm <- onm*sd_y+mean_y
+  }else{
+    outcome <- glm(fm_out, family = binomial,data = dat)
+    dat1 <- dat
+    dat1$x <- 0 ## setting x=0
+    onm <- predict.glm(outcome, newdata=dat1,type="response")
+    onm <- ifelse(onm==0,1,onm)
+  }
   
   if(!exp_bin){
-    exposure <- glm(fm_exp, family = gaussian,data = dat)
-  } else exposure <- glm(fm_exp, family = binomial,data = dat)
-  dat2 <- dat
-  dat2$y <- 0 ## setting y=0
-  enm <- predict.glm(exposure, newdata=dat2,type="response")
+    mean_x <- mean(dat$x)
+    sd_x <- sd(dat$x)
+    dat0 <- dat
+    dat0$x <- (dat0$x-mean_x)/sd_x
+    exposure <- glm(fm_exp, family = gaussian,data = dat0)
+    dat2 <- dat
+    dat2$y <- 0 ## setting x=0
+    enm <- predict.glm(exposure, newdata=dat2,type="response")
+    enm <- enm*sd_x+mean_x
+  }else{
+    exposure <- glm(fm_exp, family = binomial,data = dat)
+    dat2 <- dat
+    dat2$y <- 0 ## setting y=0
+    enm <- predict.glm(exposure, newdata=dat2,type="response")
+    enm <- ifelse(enm==0,1,enm)
+  }
   
   
   
@@ -256,12 +276,12 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     outcome <- glm(fm_out,family=binomial,data = dat)
     dat1$x <- 0 ## setting x=0
     onm <- predict.glm(outcome, newdata=dat1,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
-    onm[y==0] <- 1-onm[y==0]
+    onm <- ifelse(onm==0,1,onm)
     
     exposure <- glm(fm_exp, family = binomial,data = dat)
     dat2$y <- 0 ## setting y=0
     enm <- predict.glm(exposure, newdata=dat2,type="response") # may cause warning: prediction from a rank-deficient fit may be misleading
-    enm[x==0] <- 1-enm[x==0]
+    enm <- ifelse(enm==0,1,enm)
     
     d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
     
@@ -308,20 +328,41 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     return(result)
   }
   
-  if(!out_bin){ 
-    outcome <- glm(fm_out, family = gaussian,data = dat)
-  } else outcome <- glm(fm_out, family = binomial,data = dat)
-  dat1 <- dat
-  dat1$x <- 0 ## setting x=0
-  onm <- predict.glm(outcome, newdata=dat1,type="response")
-  
+  if(!out_bin){
+    mean_y <- mean(dat$y)
+    sd_y <- sd(dat$y)
+    dat0 <- dat
+    dat0$y <- (dat0$y-mean_y)/sd_y
+    outcome <- glm(fm_out, family = gaussian,data = dat0)
+    dat1 <- dat
+    dat1$x <- 0 ## setting x=0
+    onm <- predict.glm(outcome, newdata=dat1,type="response")
+    onm <- onm*sd_y+mean_y
+  }else{
+    outcome <- glm(fm_out, family = binomial,data = dat)
+    dat1 <- dat
+    dat1$x <- 0 ## setting x=0
+    onm <- predict.glm(outcome, newdata=dat1,type="response")
+    onm <- ifelse(onm==0,1,onm)
+  }
   
   if(!exp_bin){
-    exposure <- glm(fm_exp, family = gaussian,data = dat)
-  } else exposure <- glm(fm_exp, family = binomial,data = dat)
-  dat2 <- dat
-  dat2$y <- 0 ## setting y=0
-  enm <- predict.glm(exposure, newdata=dat2,type="response")
+    mean_x <- mean(dat$x)
+    sd_x <- sd(dat$x)
+    dat0 <- dat
+    dat0$x <- (dat0$x-mean_x)/sd_x
+    exposure <- glm(fm_exp, family = gaussian,data = dat0)
+    dat2 <- dat
+    dat2$y <- 0 ## setting x=0
+    enm <- predict.glm(exposure, newdata=dat2,type="response")
+    enm <- enm*sd_x+mean_x
+  }else{
+    exposure <- glm(fm_exp, family = binomial,data = dat)
+    dat2 <- dat
+    dat2$y <- 0 ## setting y=0
+    enm <- predict.glm(exposure, newdata=dat2,type="response")
+    enm <- ifelse(enm==0,1,enm)
+  }
   
   
   
@@ -434,8 +475,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
   if (!all(sl %in% allowed_methods)) {
     stop("Some elements in 'sl' do not exist in the list of allowed methods.")
   }
-  sl_bin <- c("SL.glm","SL.mean","SL.earth","SL.xgboost")
-  sl_gau <- c("SL.glm","SL.mean","SL.earth","SL.xgboost")
+  sl_bin <- c("SL.glm","SL.earth","SL.xgboost")
+  sl_gau <- c("SL.glm","SL.earth","SL.xgboost")
   if(! is.null(sl)){
     # Combine 'sl' with 'sl_existing'
     sl_binomial <- sl
@@ -461,13 +502,14 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                               family = binomial(),
                               SL.library = sl_binomial,
                               method = "method.AUC",
-                              cvControl = list(V = 5, stratifyCV = TRUE)
+                              cvControl = list(V = 5, stratifyCV = TRUE),
+                              control = list(trimLogit = 0)
                               )
       
       X_out_new$x <- 0 ## setting x=0
-      onm <- predict(outcome, X=X_out_new)$pred
+      onm <- predict(outcome, newdata=X_out_new)$pred
       # onm <- predict(outcome, data=dat1,type="prob")[,2]
-      onm[y==0] <- 1-onm[y==0]
+      onm[,1] <- ifelse(onm[,1]==0,1,onm[,1])
       
       # exposure 
       # exposure tune parameter
@@ -480,11 +522,12 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                family = binomial(),
                                SL.library = sl_binomial,
                                method = "method.AUC",
-                               cvControl = list(V = 5, stratifyCV = TRUE))
+                               cvControl = list(V = 5, stratifyCV = TRUE),
+                               control = list(trimLogit = 0))
       X_exp_new$y <- 0 ## setting y=0
-      enm <- predict(exposure, X = X_exp_new)$pred
+      enm <- predict(exposure, newdata = X_exp_new)$pred
       # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
-      enm[x==0] <- 1-enm[x==0]
+      enm[,1] <- ifelse(enm[,1]==0,1,enm[,1])
       
       
       d.diff <- (-1)^(y+x) ## Eric's suggestion, for y,x binary
@@ -546,9 +589,11 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                               X = X_out,
                               family = gaussian(),
                               SL.library = sl_gaussian,
-                              cvControl = list(V = 5))
+                              cvControl = list(V = 5),
+                              control = list(trimLogit = 0))
       # onm <- predict(outcome, data=dat1,type="response")$prediction
-      onm <- predict(outcome, X = X_out_new)$pred
+      X_out_new$x <- 0 ## setting x=0
+      onm <- predict(outcome, newdata = X_out_new)$pred
       onm <- onm*sd(Y_out$y)+mean(Y_out$y)
     }else{
       
@@ -559,12 +604,13 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                               family = binomial(),
                               SL.library = sl_binomial,
                               method = "method.AUC",
-                              cvControl = list(V = 5, stratifyCV = TRUE))
+                              cvControl = list(V = 5, stratifyCV = TRUE),
+                              control = list(trimLogit = 0))
       
       X_out_new$x <- 0 ## setting x=0
-      onm <- predict(outcome, X = X_out_new)$pred
+      onm <- predict(outcome, newdata = X_out_new)$pred
       # onm <- predict(outcome, data=dat1,type="prob")[,2]
-      onm[y == 0] <- 1 - onm[y == 0]
+      onm[,1] <- ifelse(onm[,1]==0,1,onm[,1])
     }
     
     
@@ -578,10 +624,11 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                X = X_exp,
                                family = gaussian(),
                                SL.library = sl_gaussian,
-                               cvControl = list(V = 5))
+                               cvControl = list(V = 5),
+                               control = list(trimLogit = 0))
       X_exp_new$y <- 0 ## setting y=0
       # enm <- predict(exposure, data=dat2,type="response")$predictions
-      enm <- predict(exposure, X = X_exp_new)$pred
+      enm <- predict(exposure, newdata = X_exp_new)$pred
       enm <- enm*sd(Y_exp$x)+mean(Y_exp$x)
     }else{
       X_exp_new <- X_exp
@@ -592,11 +639,12 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                family = binomial(),
                                SL.library = sl_binomial,
                                method = "method.AUC",
-                               cvControl = list(V = 5, stratifyCV = TRUE))
+                               cvControl = list(V = 5, stratifyCV = TRUE),
+                               control = list(trimLogit = 0))
       X_exp_new$y <- 0 ## setting Y=0
-      enm <- predict(exposure, X=X_exp_new)$pred
+      enm <- predict(exposure, newdata = X_exp_new)$pred
       # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
-      enm[x == 0] <- 1 - enm[x == 0]
+      enm[,1] <- ifelse(enm[,1]==0,1,enm[,1])
     }
     
     # build estimate function
@@ -672,10 +720,12 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                 family = binomial(),
                                 SL.library = sl_binomial,
                                 method = "method.AUC",
-                                cvControl = list(V = 5, stratifyCV = TRUE))
+                                cvControl = list(V = 5, stratifyCV = TRUE),
+                                control = list(trimLogit = 0))
         
         X_out_test$x <- 0 ## setting x=0
         onm <- predict(outcome, newdata=X_out_test)$pred
+        onm[,1] <- ifelse(onm[,1]==0,1,onm[,1])
         # onm <- predict(outcome, data=dat1,type="prob")[,2]
         
         # exposure 
@@ -697,11 +747,13 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                  family = binomial(),
                                  SL.library = sl_binomial,
                                  method = "method.AUC",
-                                 cvControl = list(V = 5, stratifyCV = TRUE))
+                                 cvControl = list(V = 5, stratifyCV = TRUE),
+                                 control = list(trimLogit = 0))
         
         
         X_exp_test$y <- 0 ## setting y=0
         enm <- predict(exposure, newdata = X_exp_test)$pred
+        enm[,1] <- ifelse(enm[,1]==0,1,enm[,1])
         # enm <- predict(exposure_train, data=dat2,type="prob")[,2]
         
         d.diff <- (-1)^(Y_out_test$y+Y_exp_test$x) ## Eric's suggestion, for y,x binary
@@ -780,7 +832,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                 X = X_out_train,
                                 family = gaussian(),
                                 SL.library = sl_gaussian,
-                                cvControl = list(V = 5))
+                                cvControl = list(V = 5),
+                                control = list(trimLogit = 0))
         
         
         X_out_test_new <- X_out_test
@@ -809,12 +862,13 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                 family = binomial(),
                                 SL.library = sl_binomial,
                                 method = "method.AUC",
-                                cvControl = list(V = 5, stratifyCV = TRUE))
+                                cvControl = list(V = 5, stratifyCV = TRUE),
+                                control = list(trimLogit = 0))
         X_out_test$x <- 0 ## setting x=0
         
         # Prediction is on the SCALED outcome
         onm_<- predict(outcome, newdata = X_out_test)$pred
-
+        onm[,1] <- ifelse(onm[,1]==0,1,onm[,1])
         
       }
       
@@ -840,7 +894,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                  X = X_exp_train,
                                  family = gaussian(),
                                  SL.library = sl_gaussian,
-                                 cvControl = list(V = 5))
+                                 cvControl = list(V = 5),
+                                 control = list(trimLogit = 0))
         
         # Predict on TEST data (y=0)
         X_exp_test_new <- X_exp_test
@@ -870,12 +925,13 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
                                  family = binomial(),
                                  SL.library = sl_binomial,
                                  method = "method.AUC",
-                                 cvControl = list(V = 5, stratifyCV = TRUE))
+                                 cvControl = list(V = 5, stratifyCV = TRUE),
+                                 control = list(trimLogit = 0))
         
         
         X_exp_test$y <- 0 ## setting y=0
         enm <- predict(exposure, newdata = X_exp_test)$pred
-        
+        enm[,1] <- ifelse(enm[,1]==0,1,enm[,1])
       }
       
       

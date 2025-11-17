@@ -1,3 +1,4 @@
+#' Super-Learning Based Conditional Independence Test Package
 #' @docType package
 #' @name ortest
 #' @keywords internal
@@ -6,11 +7,12 @@
 #' @import SuperLearner 
 #' @import stats
 #' @import pcalg
-#' @import dplyr
+#' @import tidyverse
+#' @importFrom dplyr filter
+#' @importFrom dplyr lag
 #' @importFrom numDeriv jacobian
 #' @importFrom rootSolve multiroot
 #' @importFrom utils combn
 #' @importFrom caret createFolds
-#' @importFrom tibble as_tibble
 
 NULL

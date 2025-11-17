@@ -145,7 +145,6 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
     colnames(dummies) <- paste0("x", "_", levels(x))
     dat_x <- as.data.frame(dummies)
   } 
-  ########################################  
   if(is.null(dat_y)){
     if (is.null(dat_x)) {
       res <- basic_function(x, y, S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
