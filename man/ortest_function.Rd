@@ -20,6 +20,7 @@ ortest(x, y, S, suffStat)
 \item{"method"}{The method used for the test: "sl", "linear", "linear_int"}
 \item{"sl"}{Specifies the super learning model. If \code{y} is numeric, the default method is linear regression model, mean response,MARS, random forest and XGBoost. If \code{y} is binary, the default method is LDA, mean response,MARS, random forest and XGBoost.}
 \item{"cross_fitting"}{Logical; whether cross-fitting is used in super learning.}
+\item{"error_catch"}{Logical; whether using glm to refit the model when some folds return abnormal estimation}
 \item{"kfolds"}{Number of folds for cross-fitting.}
 \item{"two_way"}{Logical; whether to include two-way interactions between variables in \code{S}.}
 \item{"three_way"}{Logical; whether to include three-way interactions between variables in \code{S}.}

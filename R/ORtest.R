@@ -3,7 +3,7 @@ all_numeric <- function(df) {
   return(all_numeric)
 }
 
-basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE) {
+basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting=FALSE,error_catch=FALSE,kfolds=5,two_way=FALSE,three_way=FALSE) {
   valid_methods <- c("sl", "linear", "linear_int")
   
   # Check if the provided method is valid
@@ -77,7 +77,11 @@ basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting
   
   
   if(method=="sl"){
-    res <- psi_hat_sl(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+    if (error_catch) {
+      res <- psi_hat_sl_cr(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+    }else{
+      res <- psi_hat_sl(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin,sl=sl,kfolds = kfolds,cross_fitting = cross_fitting)      
+    }
   }else if (method=="linear") {
     if (!cross_fitting) {
       res <- psi_hat_linear(y=y,x=x,S=S,subset = NULL,out_bin = out_bin,exp_bin=exp_bin)
@@ -96,7 +100,7 @@ basic_function <- function(x, y, S=NULL,method = "linear", sl=NULL,cross_fitting
   return(res)
 }
 
-multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, kfolds=5,two_way=FALSE,three_way=FALSE) {
+multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, error_catch=FALSE, kfolds=5,two_way=FALSE,three_way=FALSE) {
   valid_methods <- c("sl", "linear", "linear_int")
   
   # Check if the provided method is valid
@@ -147,12 +151,12 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
   } 
   if(is.null(dat_y)){
     if (is.null(dat_x)) {
-      res <- basic_function(x, y, S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+      res <- basic_function(x, y, S,method = method,sl=sl,cross_fitting = cross_fitting,error_catch=error_catch,kfolds = kfolds,two_way=two_way,three_way=three_way)
     }else{
       num_x <- ncol(dat_x)
       result <- matrix(nrow = num_x,ncol=2)
       for (i in 1:num_x) {
-        res <- basic_function(dat_x[,i], y, S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+        res <- basic_function(dat_x[,i], y, S,method = method,sl=sl,cross_fitting = cross_fitting,error_catch=error_catch,kfolds = kfolds,two_way=two_way,three_way=three_way)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -166,7 +170,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
       num_y <- ncol(dat_y)
       result <- matrix(nrow = num_y,ncol=2)
       for (i in 1:num_y) {
-        res <- basic_function(x, dat_y[,i], S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+        res <- basic_function(x, dat_y[,i], S,method = method,sl=sl,cross_fitting = cross_fitting,error_catch=error_catch,kfolds = kfolds,two_way=two_way,three_way=three_way)
         result[i,1] <- res[1]
         result[i,2] <- res[2]
       }
@@ -178,7 +182,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
       result <- matrix(nrow = num_x*num_y,ncol=2)
       for (i in 1:num_x) {
         for (j in 1:num_y) {
-          res <- basic_function(dat_x[,i], dat_y[,j], S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+          res <- basic_function(dat_x[,i], dat_y[,j], S,method = method,sl=sl,cross_fitting = cross_fitting,error_catch=error_catch,kfolds = kfolds,two_way=two_way,three_way=three_way)
           result[(i-1)*num_y+j,1] <- res[1]
           result[(i-1)*num_y+j,2] <- res[2]
         }
@@ -208,6 +212,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, k
 #'     \item{"method"}{The method used for the test: "sl", "linear", "linear_int"}
 #'     \item{"sl"}{Specifies the super learning model. If \code{y} is numeric, the default method is linear regression model, mean response,MARS, random forest and XGBoost. If \code{y} is binary, the default method is LDA, mean response,MARS, random forest and XGBoost.}
 #'     \item{"cross_fitting"}{Logical; whether cross-fitting is used in super learning.}
+#'     \item{"error_catch"}{Logical; whether using glm to refit the model when some folds return abnormal estimation}
 #'     \item{"kfolds"}{Number of folds for cross-fitting.}
 #'     \item{"two_way"}{Logical; whether to include two-way interactions between variables in \code{S}.}
 #'     \item{"three_way"}{Logical; whether to include three-way interactions between variables in \code{S}.}
@@ -233,6 +238,7 @@ ortest <- function(x,y,S,suffStat) {
   method <- suffStat$method
   sl <- suffStat$sl
   cross_fitting <- suffStat$cross_fitting
+  error_catch <- suffStat$error_catch
   kfolds <- suffStat$kfolds
   two_way <- suffStat$two_way
   three_way <- suffStat$three_way
@@ -242,7 +248,7 @@ ortest <- function(x,y,S,suffStat) {
   x <- dat[, x_pos]
   y <- dat[, y_pos]
   S <- dat[, s_pos]
-  res1 <- multi_level(x = x,y= y,S=S,method = method,sl=sl,cross_fitting = cross_fitting,kfolds = kfolds,two_way=two_way,three_way=three_way)
+  res1 <- multi_level(x = x,y= y,S=S,method = method,sl=sl,cross_fitting = cross_fitting,error_catch=error_catch,kfolds = kfolds,two_way=two_way,three_way=three_way)
   
   
   
