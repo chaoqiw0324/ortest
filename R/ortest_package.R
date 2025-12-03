@@ -7,7 +7,8 @@
 #' @import SuperLearner 
 #' @import stats
 #' @import pcalg
-#' @import tidyverse
+#' @importFrom magrittr %>%
+#' @importFrom tibble as_tibble
 #' @importFrom dplyr filter
 #' @importFrom dplyr lag
 #' @importFrom numDeriv jacobian
