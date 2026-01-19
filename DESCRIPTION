@@ -18,8 +18,10 @@ RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Suggests: 
     knitr,
-    testthat(>= 3.0.0),
-    rmarkdown
+    testthat (>= 3.0.0),
+    rmarkdown,
+    Rgraphviz
+biocViews: Infrastructure
 Imports: 
     numDeriv,
     rootSolve,

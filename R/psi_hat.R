@@ -1020,7 +1020,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
 #' In cross fitting, if one folds return abnoraml value, such as se is Inf or se is larger than ten times of res, 
 #' we will use glm only to refit the model.
 #' @return Test statistics and standard error of the test. 
-#' 
+#' @name psi_hat_sl_cr
+#' @alias psi_hat_sl_cr
 #' @export
 #' 
 psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,sl=NULL,cross_fitting = FALSE,kfolds=5){

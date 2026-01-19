@@ -222,7 +222,7 @@ multi_level <- function(x, y, S,method = "linear",sl=c(), cross_fitting=FALSE, e
 #' 
 #' @return p-value for model \code{y ~ x + S}.
 #' @export
-#' @name ortest_function
+
 ortest <- function(x,y,S,suffStat) {
   
   # Extract the positions of x, y, and S from the location vector

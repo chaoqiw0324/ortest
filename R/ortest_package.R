@@ -1,6 +1,6 @@
 #' Super-Learning Based Conditional Independence Test Package
 #' @docType package
-#' @name ortest
+#' @name ortest-package
 #' @keywords internal
 #' @import BB 
 #' @import lubridate
