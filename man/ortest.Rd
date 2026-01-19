@@ -2,6 +2,22 @@
 % Please edit documentation in R/ortest_package.R
 \docType{package}
 \name{ortest}
+\alias{ortest-package}
 \alias{ortest}
 \title{Super-Learning Based Conditional Independence Test Package}
+\description{
+Function for conditional independence test, using different method for mixed data type.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/chaoqiw0324/ortest}
+  \item Report bugs at \url{https://github.com/chaoqiw0324/ortest/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Chaoqi Wu \email{cw3370@cumc.columbia.edu} (\href{https://orcid.org/{{orcid}}}{ORCID}) [copyright holder]
+
+}
 \keyword{internal}

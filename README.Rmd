@@ -24,6 +24,7 @@ ortest <img src="man/figures/package-sticker.png" alt="Package sticker for ortes
 [![Test coverage](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.yaml)
 [![codecov](https://codecov.io/gh/chaoqiw0324/ortest/branch/master/graph/badge.svg)](https://codecov.io/gh/chaoqiw0324/ortest)
 [![License: GPL (>= 2)](https://img.shields.io/badge/License-GPL%20%28%3E%3D%202%29-blue.svg)](https://choosealicense.com/licenses/gpl-2.0/)
+[![Codecov test coverage](https://codecov.io/gh/chaoqiw0324/ortest/graph/badge.svg)](https://app.codecov.io/gh/chaoqiw0324/ortest)
 <!-- badges: end -->
 
 

@@ -1,3 +1,53 @@
+trans <- function(z){
+  result = exp(-(z^(2))/2)*sin(2*z)
+  return(result)
+}
+
+expit <- function(x) {
+  1 / (1 + exp(-x))
+}
+
+data_generation_cont_bin <- function(n,hypothesis="null",S="a"){
+  allowed_methods <- c(
+    "a","b","c","d","e"
+  )
+  
+  # Check if all elements in 'sl' exist in allowed methods
+  if (!all(S %in% allowed_methods)) {
+    stop("The models for S doesn't exist")
+  }
+  
+  S1 <- runif(n,0,1)
+  S2 <- runif(n,0,1)
+  S3 <- runif(n,0,1)
+  S4 <- runif(n,0,1)
+  S5 <- runif(n,0,1)
+  if (S == "a") {
+    S <- S1 + S2 + S3 + S4 + S5 - 2.5 # Adjusted
+  } else if (S == "b") {
+    S <- (S1 * S2 + S3 * S4 + S5) / 2 - 0.5 # Adjusted
+  } else if (S == "c") {
+    S <- (S1 * S2 * S3 + S4 + S5) # Adjusted
+  } else if (S == "d") {
+    S <- (S1 * S2 + S3 * S4 + S5 + S1^2 + S5^2 + S3^3) / 5 -0.4 # Adjusted
+  } else {
+    S <- S1 + S2 + trans(S3) + S4 + trans(S5) - 2 # Adjusted
+  }   
+  prob <- expit(S)
+  # x <- rbinom(n,1,prob)
+  x <- rbinom(n,1,prob)
+  if (hypothesis=="null")  {
+    y <- 1 + S + rnorm(n,0,5) 
+  }else if(hypothesis=="alternative"){
+    # y <- 1 + 5 * x + S + x * S + rnorm(n,0,1)
+    # y <- 1 + 5 * x + S  + rnorm(n,0,1)
+    y <- 1 + 5 * x + S  + rnorm(n,0,5)
+  }
+  data <- tibble::as_tibble(cbind(y, x, S1, S2, S3, S4, S5, prob))
+  return(data)
+}
+
+
 create_multi_level_factor <- function(data, levels = 3, labels = NULL) {
   if (!is.numeric(data)) {
     stop("Input data must be numeric.")

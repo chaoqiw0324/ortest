@@ -13,3 +13,4 @@
 ^or_test\.Rproj$
 ^_pkgdown\.yml$
 ^pkgdown$
+^codecov\.yml$
