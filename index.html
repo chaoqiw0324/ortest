@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="The Title of the Project">
-<meta property="og:description" content="Function for conditional independence test">
+<meta property="og:description" content="Function for conditional independence test, using different method for mixed data type.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -71,17 +71,16 @@
 <!-- badges: start -->
 
 <p align="left">
-• <a href="#overview">Overview</a><br> • <a href="#features">Features</a><br> • <a href="#installation">Installation</a><br> • <a href="#get-started">Get started</a><br> • <a href="#long-form-documentations">Long-form documentations</a><br> • <a href="#citation">Citation</a><br> • <a href="#contributing">Contributing</a><br> • <a href="#acknowledgments">Acknowledgments</a><br> • <a href="#references">References</a>
-</p>
+• <a href="#overview">Overview</a><br> • <a href="#features">Features</a><br> • <a href="#installation">Installation</a><br> • <a href="#get-started">Get started</a><br> • <a href="#citation">Citation</a><br> • <a href="#contributing">Contributing</a><br></p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The R package <code>ortest</code>… <strong>{{ DESCRIBE YOUR PACKAGE }}</strong></p>
+<p>The R package <code>ortest</code> provides an odds ratio based conditional independence test for mixed data types, using nonparametric methods for nuisance estimation, including random forests, XGboost, and SuperLearner</p>
 </div>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
-<p>The main purpose of <code>ortest</code> is to… <strong>{{ DESCRIBE THE MAIN FEATURES }}</strong></p>
+<p>The main purpose of <code>ortest</code> is to test conditional independence test for mixed data types including numeric, binary and multi-level factor, and to implemented in pc algorithm.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -100,23 +99,14 @@
 <div class="section level2">
 <h2 id="get-started">Get started<a class="anchor" aria-label="anchor" href="#get-started"></a>
 </h2>
-<p>For an overview of the main features of <code>ortest</code>, please read the <a href="https://chaoqiw0324.github.io/ortest/articles/ortest.html" class="external-link">Get started</a> vignette.</p>
-</div>
-<div class="section level2">
-<h2 id="long-form-documentations">Long-form documentations<a class="anchor" aria-label="anchor" href="#long-form-documentations"></a>
-</h2>
-<p><code>ortest</code> provides <strong>{{ NUMBER OF VIGNETTES }}</strong> vignettes to learn more about the package:</p>
-<ul>
-<li>the <a href="https://chaoqiw0324.github.io/ortest/articles/ortest.html" class="external-link">Get started</a> vignette describes the core features of the package</li>
-<li><strong>{{ LIST ADDITIONAL VIGNETTES }}</strong></li>
-</ul>
+<p>For an overview of the main features of <code>ortest</code>, please read the <a href="https://chaoqiw0324.github.io/ortest/articles/ortest.html" class="external-link">Using the Ortest package</a> vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>Please cite <code>ortest</code> as:</p>
 <blockquote>
-<p>Wu Chaoqi (2024) ortest: An R package to <strong>{{ TITLE }}</strong>. R package version 0.0.0.9000. <a href="https://github.com/chaoqiw0324/ortest/" class="external-link uri">https://github.com/chaoqiw0324/ortest/</a></p>
+<p>Wu Chaoqi (2024) ortest: An R package to ortest. R package version 0.0.0.9000. <a href="https://github.com/chaoqiw0324/ortest/" class="external-link uri">https://github.com/chaoqiw0324/ortest/</a></p>
 </blockquote>
 </div>
 <div class="section level2">
@@ -124,16 +114,6 @@
 </h2>
 <p>All types of contributions are encouraged and valued. For more information, check out our <a href="https://github.com/chaoqiw0324/ortest/blob/main/CONTRIBUTING.md" class="external-link">Contributor Guidelines</a>.</p>
 <p>Please note that the <code>ortest</code> project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
-</div>
-<div class="section level2">
-<h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
-</h2>
-<p><strong>{{ OPTIONAL SECTION }}</strong></p>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p><strong>{{ OPTIONAL SECTION }}</strong></p>
 </div>
 </div>
   </div>
@@ -173,7 +153,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Chaoqi Wu <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/%7B%7Borcid%7D%7D" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Chaoqi Wu <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/%7B%7Borcid%7D%7D" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -200,7 +180,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer>

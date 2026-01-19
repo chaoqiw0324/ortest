@@ -7,8 +7,13 @@
 <url><loc>/articles/ortest.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
+<url><loc>/reference/generate_test_data.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
-<url><loc>/reference/ortest-package.html</loc></url>
-<url><loc>/reference/print_msg.html</loc></url>
+<url><loc>/reference/ortest.html</loc></url>
+<url><loc>/reference/ortest_function.html</loc></url>
+<url><loc>/reference/psi_hat_linear.html</loc></url>
+<url><loc>/reference/psi_hat_linear_int.html</loc></url>
+<url><loc>/reference/psi_hat_sl.html</loc></url>
+<url><loc>/reference/psi_hat_sl_cr.html</loc></url>
 </urlset>
 
