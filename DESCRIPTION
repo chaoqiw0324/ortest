@@ -6,7 +6,7 @@ Authors@R: c(
     person(given   = "Chaoqi",
            family  = "Wu",
            role    = c("aut", "cre", "cph"),
-           email   = "cw3370@cumc.columbia.edu")
+           email   = "wuchaoqi0324@gmail")
            )
 Description: Provides conditional independence tests for mixed data types based on
     estimating conditional odds-ratio parameters. Implementations include
