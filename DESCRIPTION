@@ -1,14 +1,17 @@
 Package: ortest
 Type: Package
-Title: The Title of the Project
-Version: 0.0.0.9000
+Title: Conditional Independence Tests via Odds-Ratio Estimation
+Version: 0.1.0
 Authors@R: c(
     person(given   = "Chaoqi",
            family  = "Wu",
            role    = c("aut", "cre", "cph"),
-           email   = "cw3370@cumc.columbia.edu",
-           comment = c(ORCID = "{{orcid}}")))
-Description: Function for conditional independence test, using different method for mixed data type.
+           email   = "cw3370@cumc.columbia.edu")
+           )
+Description: Provides conditional independence tests for mixed data types based on
+    estimating conditional odds-ratio parameters. Implementations include
+    regression-based estimating equations and optional Super Learner-based nuisance
+    estimation with (optional) cross-fitting.
 URL: https://github.com/chaoqiw0324/ortest
 BugReports: https://github.com/chaoqiw0324/ortest/issues
 License: GPL (>= 2)
@@ -19,9 +22,7 @@ VignetteBuilder: knitr
 Suggests: 
     knitr,
     testthat (>= 3.0.0),
-    rmarkdown,
-    Rgraphviz
-biocViews: Infrastructure
+    rmarkdown
 Imports: 
     numDeriv,
     rootSolve,
@@ -32,7 +33,6 @@ Imports:
     lubridate,
     pcalg,
     stats,
-    dplyr,
     magrittr,
     SuperLearner
 Depends: 

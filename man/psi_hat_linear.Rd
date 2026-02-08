@@ -4,7 +4,7 @@
 \alias{psi_hat_linear}
 \title{Regression Based Conditional Independence Test}
 \usage{
-psi_hat_linear(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE)
+psi_hat_linear(y, x, S = c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE)
 }
 \arguments{
 \item{y}{Outcome variable, either binary or numeric}

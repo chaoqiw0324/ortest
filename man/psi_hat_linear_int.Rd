@@ -4,8 +4,16 @@
 \alias{psi_hat_linear_int}
 \title{Regression Based With Interaction Conditional Independence Test}
 \usage{
-psi_hat_linear_int(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,
- two_way=FALSE, three_way=FALSE)
+psi_hat_linear_int(
+  y,
+  x,
+  S = c(),
+  subset = NULL,
+  out_bin = TRUE,
+  exp_bin = FALSE,
+  two_way = FALSE,
+  three_way = FALSE
+)
 }
 \arguments{
 \item{y}{Outcome variable, either binary or numeric}

@@ -4,8 +4,17 @@
 \alias{psi_hat_sl_cr}
 \title{Super-Learning Based Conditional Independence Test With Correction}
 \usage{
-psi_hat_sl(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE, 
-sl=NULL,cross_fitting = FALSE,kfolds=5)
+psi_hat_sl_cr(
+  y,
+  x,
+  S = c(),
+  subset = NULL,
+  out_bin = TRUE,
+  exp_bin = FALSE,
+  sl = NULL,
+  cross_fitting = FALSE,
+  kfolds = 5
+)
 }
 \arguments{
 \item{y}{Outcome variable, either binary or numeric}

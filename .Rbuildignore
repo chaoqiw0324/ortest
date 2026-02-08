@@ -16,3 +16,11 @@
 ^codecov\.yml$
 ^doc$
 ^Meta$
+^ortest\.Rd$
+
+# --- local / IDE / git artifacts (must not ship in source tarball) ---
+^\.git$
+^\.gitignore$
+^\.Rhistory$
+^\.RData$
+^\.Renviron$

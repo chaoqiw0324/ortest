@@ -2,9 +2,6 @@
 #' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
-#' @usage 
-#' psi_hat_linear(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE)
-#' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
 #' @param S Conditional variable set, can be empty
@@ -198,10 +195,6 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
 #' 
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model allowing interaction between variables in \code{S}. 
-#' @usage 
-#' psi_hat_linear_int(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,
-#'  two_way=FALSE, three_way=FALSE)
-#' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
 #' @param S Conditional variable set, can be empty
@@ -411,10 +404,6 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
 #'
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
-#' @usage 
-#' psi_hat_sl(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE, 
-#' sl=NULL,cross_fitting = FALSE,kfolds=5)
-#' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
 #' @param S Conditional variable set, can be empty
@@ -997,9 +986,6 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
 #'
 #' We test whether \code{x} and \code{y} are conditionally associated, given
 #' \code{S} using a generalized linear model. 
-#' @usage 
-#' psi_hat_sl(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE, 
-#' sl=NULL,cross_fitting = FALSE,kfolds=5)
 #' 
 #' @param y Outcome variable, either binary or numeric
 #' @param x Exposure variable, either binary or numeric
@@ -1020,8 +1006,6 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
 #' In cross fitting, if one folds return abnoraml value, such as se is Inf or se is larger than ten times of res, 
 #' we will use glm only to refit the model.
 #' @return Test statistics and standard error of the test. 
-#' @name psi_hat_sl_cr
-#' @alias psi_hat_sl_cr
 #' @export
 #' 
 psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FALSE,sl=NULL,cross_fitting = FALSE,kfolds=5){
