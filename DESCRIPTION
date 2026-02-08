@@ -22,7 +22,8 @@ VignetteBuilder: knitr
 Suggests: 
     knitr,
     testthat (>= 3.0.0),
-    rmarkdown
+    rmarkdown,
+    pcalg
 Imports: 
     numDeriv,
     rootSolve,
@@ -31,7 +32,6 @@ Imports:
     caret,
     tibble,
     lubridate,
-    pcalg,
     stats,
     magrittr,
     SuperLearner

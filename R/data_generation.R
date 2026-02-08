@@ -86,9 +86,13 @@ create_multi_level_factor <- function(data, levels = 3, labels = NULL) {
 #' @export
 
 generate_test_data <- function(N=2000){
-  rDAG <- randomDAG(n = 10, prob= 0.7, lB = 0.4, uB = 1)
+  if (!requireNamespace("pcalg", quietly = TRUE)) {
+    stop("Package 'pcalg' is required for generate_test_data(). Please install it.",
+         call. = FALSE)
+  }
+  rDAG <- pcalg::randomDAG(n = 10, prob= 0.7, lB = 0.4, uB = 1)
   
-  data <- rmvDAG(N,rDAG,errDist="normal")
+  data <- pcalg::rmvDAG(N,rDAG,errDist="normal")
   data[,2] <- ifelse(data[,2]<=median(data[,2]),0,1)
   data[,3] <- ifelse(data[,3]<=median(data[,3]),0,1)
   data[,8] <- ifelse(data[,8]<=median(data[,8]),0,1)

@@ -90,7 +90,7 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
  
     }, error = function(e) {
       # If an error occurs, set res to zero
-      cat("Error encountered: ", conditionMessage(e), "\n")
+      # cat("Error encountered: ", conditionMessage(e), "\n")
       0
     })
     
@@ -298,7 +298,7 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
         res <-  est$root
     }, error = function(e) {
       # If an error occurs, set res to zero
-      cat("Error encountered: ", conditionMessage(e), "\n")
+      # cat("Error encountered: ", conditionMessage(e), "\n")
       0
     })
     
@@ -540,7 +540,7 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
           res <-  est$root
       }, error = function(e) {
         # If an error occurs, set res to zero
-        cat("Error encountered: ", conditionMessage(e), "\n")
+        # cat("Error encountered: ", conditionMessage(e), "\n")
         0
       })      
       
@@ -656,7 +656,7 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
         res <- sol$par
     }, error = function(e) {
       # If an error occurs, set res to zero
-      cat("Error encountered: ", conditionMessage(e), "\n")
+      # cat("Error encountered: ", conditionMessage(e), "\n")
       0
     })    
     # Baking the bread (approximate derivative)
@@ -773,7 +773,7 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
             sol$par
         }, error = function(e) {
           # If an error occurs, set res to zero
-          cat("Error encountered: ", conditionMessage(e), "\n")
+          # cat("Error encountered: ", conditionMessage(e), "\n")
           0
         })
         
@@ -944,7 +944,7 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
           sol$par
       }, error = function(e) {
         # If an error occurs, set res to zero
-        cat("Error encountered: ", conditionMessage(e), "\n")
+        # cat("Error encountered: ", conditionMessage(e), "\n")
         0
       })
       
@@ -1124,7 +1124,7 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
         res <-  est$root
       }, error = function(e) {
         # If an error occurs, set res to zero
-        cat("Error encountered: ", conditionMessage(e), "\n")
+        # cat("Error encountered: ", conditionMessage(e), "\n")
         0
       })      
       
@@ -1240,7 +1240,7 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
       res <- sol$par
     }, error = function(e) {
       # If an error occurs, set res to zero
-      cat("Error encountered: ", conditionMessage(e), "\n")
+      # cat("Error encountered: ", conditionMessage(e), "\n")
       0
     })    
     # Baking the bread (approximate derivative)
@@ -1357,7 +1357,7 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
           sol$par
         }, error = function(e) {
           # If an error occurs, set res to zero
-          cat("Error encountered: ", conditionMessage(e), "\n")
+          # cat("Error encountered: ", conditionMessage(e), "\n")
           0
         })
         
@@ -1460,7 +1460,7 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
             sol$par
           }, error = function(e) {
             # If an error occurs, set res to zero
-            cat("Error encountered: ", conditionMessage(e), "\n")
+            # cat("Error encountered: ", conditionMessage(e), "\n")
             0
           })
           
@@ -1631,7 +1631,7 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
         sol$par
       }, error = function(e) {
         # If an error occurs, set res to zero
-        cat("Error encountered: ", conditionMessage(e), "\n")
+        # cat("Error encountered: ", conditionMessage(e), "\n")
         0
       })
       
@@ -1795,7 +1795,7 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
           sol$par
         }, error = function(e) {
           # If an error occurs, set res to zero
-          cat("Error encountered: ", conditionMessage(e), "\n")
+          # cat("Error encountered: ", conditionMessage(e), "\n")
           0
         })
         
