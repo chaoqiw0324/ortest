@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ortest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -66,12 +66,12 @@
       </header><div class="row">
   <div class="contents col-md-9">
 <div class="section level1">
-<div class="page-header"><h1 id="ortest-">ortest <img src="reference/figures/package-sticker.png" align="right" style="float:right; height:120px;"><a class="anchor" aria-label="anchor" href="#ortest-"></a>
+<div class="page-header"><h1 id="ortest-">ortest <img src="reference/figures/package-sticker.png" alt="Package sticker for ortest" align="right" style="float:right; height:120px;"><a class="anchor" aria-label="anchor" href="#ortest-"></a>
 </h1></div>
 <!-- badges: start -->
 
 <p align="left">
-• <a href="#overview">Overview</a><br> • <a href="#features">Features</a><br> • <a href="#installation">Installation</a><br> • <a href="#get-started">Get started</a><br> • <a href="#citation">Citation</a><br> • <a href="#contributing">Contributing</a><br></p>
+• <a href="#overview">Overview</a><br> • <a href="#features">Features</a><br> • <a href="#installation">Installation</a><br> • <a href="#get-started">Get started</a><br><!-- • <a href="#long-form-documentations">Long-form documentations</a><br> --> • <a href="#citation">Citation</a><br> • <a href="#contributing">Contributing</a><br><!-- • <a href="#acknowledgments">Acknowledgments</a><br> --><!-- • <a href="#references">References</a> --></p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -86,15 +86,17 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>You can install the development version from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="do">## Install &lt; remotes &gt; package (if not already installed) ----</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"remotes"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"remotes"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>}</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="do">## Install &lt; ortest &gt; from GitHub ----</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"chaoqiw0324/ortest"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## Install &lt; remotes &gt; package (if not already installed) ----</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co">## Install &lt; ortest &gt; from GitHub ----</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"chaoqiw0324/ortest"</span><span class="op">)</span></span></code></pre></div>
 <p>Then you can attach the package <code>ortest</code>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ortest"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/chaoqiw0324/ortest" class="external-link">"ortest"</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="get-started">Get started<a class="anchor" aria-label="anchor" href="#get-started"></a>
@@ -108,12 +110,6 @@
 <blockquote>
 <p>Wu Chaoqi (2024) ortest: An R package to ortest. R package version 0.0.0.9000. <a href="https://github.com/chaoqiw0324/ortest/" class="external-link uri">https://github.com/chaoqiw0324/ortest/</a></p>
 </blockquote>
-</div>
-<div class="section level2">
-<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
-</h2>
-<p>All types of contributions are encouraged and valued. For more information, check out our <a href="https://github.com/chaoqiw0324/ortest/blob/main/CONTRIBUTING.md" class="external-link">Contributor Guidelines</a>.</p>
-<p>Please note that the <code>ortest</code> project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </div>
@@ -164,8 +160,9 @@
 <li><a href="https://github.com/chaoqiw0324/ortest/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/chaoqiw0324/ortest/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R CMD Check"></a></li>
 <li><a href="https://github.com/chaoqiw0324/ortest/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/chaoqiw0324/ortest/actions/workflows/pkgdown.yaml/badge.svg" alt="Website"></a></li>
 <li><a href="https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.yaml/badge.svg" alt="Test coverage"></a></li>
-<li><a href="https://codecov.io/gh/chaoqiw0324/ortest" class="external-link"><img src="https://codecov.io/gh/chaoqiw0324/ortest/branch/master/graph/badge.svg" alt="codecov"></a></li>
+<li><a href="https://app.codecov.io/gh/chaoqiw0324/ortest" class="external-link"><img src="https://app.codecov.io/gh/chaoqiw0324/ortest/branch/main/graph/badge.svg" alt="codecov"></a></li>
 <li><a href="https://choosealicense.com/licenses/gpl-2.0/" class="external-link"><img src="https://img.shields.io/badge/License-GPL%20%28%3E%3D%202%29-blue.svg" alt="License: GPL (&gt;= 2)"></a></li>
+<li><a href="https://app.codecov.io/gh/chaoqiw0324/ortest" class="external-link"><img src="https://codecov.io/gh/chaoqiw0324/ortest/graph/badge.svg" alt="Codecov test coverage"></a></li>
 </ul>
 </div>
 
