@@ -16,7 +16,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Chaoqi Wu \email{cw3370@cumc.columbia.edu} [copyright holder]
+\strong{Maintainer}: Chaoqi Wu \email{wuchaoqi0324@gmail.com} [copyright holder]
 
 }
 \keyword{internal}

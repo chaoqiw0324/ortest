@@ -22,7 +22,7 @@ ortest <img src="man/figures/package-sticker.png" alt="Package sticker for ortes
 [![R CMD Check](https://github.com/chaoqiw0324/ortest/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chaoqiw0324/ortest/actions/workflows/R-CMD-check.yaml)
 [![Website](https://github.com/chaoqiw0324/ortest/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/chaoqiw0324/ortest/actions/workflows/pkgdown.yaml)
 [![Test coverage](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/chaoqiw0324/ortest/actions/workflows/test-coverage.yaml)
-[![codecov](https://codecov.io/gh/chaoqiw0324/ortest/branch/master/graph/badge.svg)](https://codecov.io/gh/chaoqiw0324/ortest)
+[![codecov](https://app.codecov.io/gh/chaoqiw0324/ortest/branch/main/graph/badge.svg)](https://app.codecov.io/gh/chaoqiw0324/ortest)
 [![License: GPL (>= 2)](https://img.shields.io/badge/License-GPL%20%28%3E%3D%202%29-blue.svg)](https://choosealicense.com/licenses/gpl-2.0/)
 [![Codecov test coverage](https://codecov.io/gh/chaoqiw0324/ortest/graph/badge.svg)](https://app.codecov.io/gh/chaoqiw0324/ortest)
 <!-- badges: end -->
@@ -90,15 +90,6 @@ Please cite `ortest` as:
 > Wu Chaoqi (2024) ortest: An R package to ortest. R package
 > version 0.0.0.9000. <https://github.com/chaoqiw0324/ortest/>
 
-## Contributing
 
-All types of contributions are encouraged and valued. For more
-information, check out our [Contributor
-Guidelines](https://github.com/chaoqiw0324/ortest/blob/main/CONTRIBUTING.md).
-
-Please note that the `ortest` project is released with a [Contributor
-Code of
-Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
-By contributing to this project, you agree to abide by its terms.
 
 

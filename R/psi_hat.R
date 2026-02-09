@@ -84,8 +84,8 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
     
     
     res <- tryCatch({
-        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
-        est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+        U_binbin <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+        est <- uniroot(U_binbin, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
         res <-  est$root
  
     }, error = function(e) {
@@ -166,9 +166,9 @@ psi_hat_linear <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin =
     return(este)
   }   
   
-    U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+    U_bc <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
     par.init <- c(0)
-    sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+    sol <- BBsolve(par=par.init, fn=U_bc, quiet=TRUE) 
     res <- sol$par
   
   # Baking the bread (approximate derivative)
@@ -293,8 +293,8 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     
     res <- tryCatch({
 
-        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
-        est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+        U_binbin <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+        est <- uniroot(U_binbin, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
         res <-  est$root
     }, error = function(e) {
       # If an error occurs, set res to zero
@@ -375,9 +375,9 @@ psi_hat_linear_int <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_b
     return(este)
   }   
   
-    U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+    U_bc <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
     par.init <- c(0)
-    sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+    sol <- BBsolve(par=par.init, fn=U_bc, quiet=TRUE) 
     res <- sol$par
   
   # Baking the bread (approximate derivative)
@@ -535,8 +535,8 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       
       res <- tryCatch({
 
-          U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
-          est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+          U_binbin <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+          est <- uniroot(U_binbin, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
           res <-  est$root
       }, error = function(e) {
         # If an error occurs, set res to zero
@@ -650,9 +650,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
     
     
     res <- tryCatch({
-        U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+        U_bc <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
         par.init <- c(0)
-        sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+        sol <- BBsolve(par=par.init, fn=U_bc, quiet=TRUE) 
         res <- sol$par
     }, error = function(e) {
       # If an error occurs, set res to zero
@@ -764,12 +764,12 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
             # }
             # est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, maxiter = 1000, onm = onm, enm = enm, d.diff = d.diff)
             # est$root
-            U <- function(psi) { 
+            U_binbin_sl <- function(psi) { 
               sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
               
             }
             par.init <- c(0)
-            sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+            sol <- BBsolve(par=par.init, fn=U_binbin_sl, quiet=TRUE) 
             sol$par
         }, error = function(e) {
           # If an error occurs, set res to zero
@@ -938,9 +938,9 @@ psi_hat_sl <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = FAL
       }
       
       res <- tryCatch({
-          U <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
+          U_bc_sl <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
           par.init <- c(0)
-          sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+          sol <- BBsolve(par=par.init, fn=U_bc_sl, quiet=TRUE) 
           sol$par
       }, error = function(e) {
         # If an error occurs, set res to zero
@@ -1119,8 +1119,8 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
       
       res <- tryCatch({
         
-        U <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
-        est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
+        U_binbin <- function(psi,onm,enm,d.diff){ sum( d.diff*h.dag / (exp(psi*y*x)*onm*enm) ) }
+        est <- uniroot(U_binbin, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001,maxiter=1000, onm = onm, enm = enm, d.diff=d.diff)
         res <-  est$root
       }, error = function(e) {
         # If an error occurs, set res to zero
@@ -1234,9 +1234,9 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
     
     
     res <- tryCatch({
-      U <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
+      U_bc <- function(psi){ sum( (y - onm)*(x - enm)*exp(-psi*y*x) )}
       par.init <- c(0)
-      sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+      sol <- BBsolve(par=par.init, fn=U_bc, quiet=TRUE) 
       res <- sol$par
     }, error = function(e) {
       # If an error occurs, set res to zero
@@ -1348,12 +1348,12 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
           # }
           # est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, maxiter = 1000, onm = onm, enm = enm, d.diff = d.diff)
           # est$root
-          U <- function(psi) { 
+          U_binbin_sl <- function(psi) { 
             sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
             
           }
           par.init <- c(0)
-          sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+          sol <- BBsolve(par=par.init, fn=U_binbin_sl, quiet=TRUE) 
           sol$par
         }, error = function(e) {
           # If an error occurs, set res to zero
@@ -1451,12 +1451,12 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
             # }
             # est <- uniroot(U, interval = c(-3.0, 3.0), extendInt = "yes", tol = 0.001, maxiter = 1000, onm = onm, enm = enm, d.diff = d.diff)
             # est$root
-            U <- function(psi) { 
+            U_binbin_sl_cr <- function(psi) { 
               sum(d.diff * h.dag / (exp(psi * Y_out_test$y * Y_exp_test$x) * onm * enm)) 
               
             }
             par.init <- c(0)
-            sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+            sol <- BBsolve(par=par.init, fn=U_binbin_sl_cr, quiet=TRUE) 
             sol$par
           }, error = function(e) {
             # If an error occurs, set res to zero
@@ -1625,9 +1625,9 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
       }
       
       res <- tryCatch({
-        U <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
+        U_bc_sl <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
         par.init <- c(0)
-        sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+        sol <- BBsolve(par=par.init, fn=U_bc_sl, quiet=TRUE) 
         sol$par
       }, error = function(e) {
         # If an error occurs, set res to zero
@@ -1789,9 +1789,9 @@ psi_hat_sl_cr <- function(y, x, S=c(), subset = NULL, out_bin = TRUE, exp_bin = 
         }
         
         res <- tryCatch({
-          U <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
+          U_bc_sl_cr <- function(psi){ sum( (Y_out_test$y - onm)*(Y_exp_test$x - enm)*exp(-psi*Y_out_test$y*Y_exp_test$x) )}
           par.init <- c(0)
-          sol <- BBsolve(par=par.init, fn=U, quiet=TRUE) 
+          sol <- BBsolve(par=par.init, fn=U_bc_sl_cr, quiet=TRUE) 
           sol$par
         }, error = function(e) {
           # If an error occurs, set res to zero
